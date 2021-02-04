@@ -7,7 +7,7 @@ License: Zlib
 #include "csv_parser.h"
 
 #define CATCH_CONFIG_MAIN
-#include "catch2/catch.hpp"
+#include "catch.hpp"
 
 
 using namespace std::string_view_literals;
@@ -58,7 +58,7 @@ void parseValues(std::string_view data, std::vector<std::vector<CsvCellReference
 
 
 
-TEST_CASE("CsvLoadVariants", "[fast][parser][core][csv]")
+TEST_CASE("CsvLoadVariants", "[csv][parser]")
 {
 	/*
 	 * https://www.ietf.org/rfc/rfc4180.txt

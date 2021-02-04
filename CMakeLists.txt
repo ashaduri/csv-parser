@@ -15,12 +15,12 @@ target_compile_options(compiler_warnings INTERFACE
 add_library(csv_parser INTERFACE)
 target_sources(csv_parser
 	INTERFACE
-		${CMAKE_CURRENT_SOURCE_DIR}/csv_cell.h
-		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser.h
+		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_cell.h
+		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_parser.h
 )
 target_include_directories(csv_parser
 	INTERFACE
-		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser
 )
 
 
