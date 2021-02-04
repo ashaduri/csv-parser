@@ -46,6 +46,25 @@ target_link_libraries(test_csv_parser
 		compiler_warnings
 )
 
+# Examples
+add_executable(example_runtime
+	examples/example_runtime.cpp
+)
+target_link_libraries(example_runtime
+	PRIVATE
+		csv_parser
+		compiler_warnings
+)
+
+add_executable(example_compiletime
+	examples/example_compiletime.cpp
+)
+target_link_libraries(example_compiletime
+	PRIVATE
+		csv_parser
+		compiler_warnings
+)
+
 
 include(CTest)
 include(catch2/Catch.cmake)
