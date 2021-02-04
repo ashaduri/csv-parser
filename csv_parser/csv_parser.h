@@ -81,8 +81,12 @@ class CsvParser {
 		{
 			Vector2D parsed_values;
 			parse(data, [&](std::size_t row, std::size_t column, std::string_view cell_data, CsvCellTypeHint hint) {
-				parsed_values.resize(column + 1);
-				parsed_values[column].resize(row + 1);
+				if (parsed_values.size() < (column + 1)) {
+					parsed_values.resize(column + 1);
+				}
+				if (parsed_values[column].size() < (row + 1)) {
+					parsed_values[column].resize(row + 1);
+				}
 				parsed_values[column][row] = {cell_data, hint};
 			});
 			std::swap(values, parsed_values);
