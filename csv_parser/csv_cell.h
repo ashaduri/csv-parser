@@ -202,7 +202,7 @@ inline std::optional<double> readDouble(std::string_view cell)
 
 	// Convert to lowercase (needed for Matlab-produced CSV files)
 	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
-		return std::tolower(c);
+		return static_cast<char>(std::tolower(c));
 	});
 
 	std::optional<double> double_value;
