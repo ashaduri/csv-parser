@@ -250,6 +250,25 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 			REQUIRE(values.at(0).at(3).getType() == CsvCellType::String);
 			REQUIRE(values.at(0).at(3).getOriginalStringView() == "endings"sv);
 		}
+
+
+		SECTION("parse 2D data") {
+			parseValues("abc,def\n5,6", values);
+
+			REQUIRE(values.size() == 2);
+			REQUIRE(values[0].size() == 2);
+			REQUIRE(values[1].size() == 2);
+
+			REQUIRE(values[0][0].getType() == CsvCellType::String);
+			REQUIRE(values[1][0].getType() == CsvCellType::String);
+			REQUIRE(values[0][1].getType() == CsvCellType::Double);
+			REQUIRE(values[1][1].getType() == CsvCellType::Double);
+
+			REQUIRE(values.at(0).at(0).getCleanString() == "abc"s);
+			REQUIRE(values.at(0).at(1).getCleanString() == "def"s);
+			REQUIRE(values.at(0).at(2).getDouble() == 5.);
+			REQUIRE(values.at(0).at(3).getDouble() == 6.);
+		}
 	}
 
 
@@ -285,13 +304,13 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 				throw std::runtime_error("Parsing 0, 0 failed");
 			}
 			if (matrix[1][0].getOriginalStringView() != "def"sv) {
-				throw std::runtime_error("Parsing 0, 0 failed");
+				throw std::runtime_error("Parsing 1, 0 failed");
 			}
 			if (matrix[0][1].getOriginalStringView() != "5"sv) {
-				throw std::runtime_error("Parsing 0, 0 failed");
+				throw std::runtime_error("Parsing 0, 1 failed");
 			}
 			if (matrix[1][1].getOriginalStringView() != "6"sv) {
-				throw std::runtime_error("Parsing 0, 0 failed");
+				throw std::runtime_error("Parsing 1, 1 failed");
 			}
 			return true;
 		}();
