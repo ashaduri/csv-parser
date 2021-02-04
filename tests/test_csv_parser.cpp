@@ -3,11 +3,15 @@ Copyright: (C) 2021 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
-#include <limits>
 #include "csv_parser.h"
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
+
+#include <array>
+#include <vector>
+#include <cmath>
+#include <limits>
 
 
 using namespace std::string_view_literals;
