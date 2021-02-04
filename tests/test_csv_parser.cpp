@@ -265,9 +265,9 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 			REQUIRE(values[1][1].getType() == CsvCellType::Double);
 
 			REQUIRE(values.at(0).at(0).getCleanString() == "abc"s);
-			REQUIRE(values.at(0).at(1).getCleanString() == "def"s);
-			REQUIRE(values.at(0).at(2).getDouble() == 5.);
-			REQUIRE(values.at(0).at(3).getDouble() == 6.);
+			REQUIRE(values.at(1).at(0).getCleanString() == "def"s);
+			REQUIRE(values.at(0).at(1).getDouble() == 5.);
+			REQUIRE(values.at(1).at(1).getDouble() == 6.);
 		}
 	}
 
