@@ -1,5 +1,5 @@
 # C++17 CSV Parser (csv-parser)
-Compile-time CSV parser written in C++17.
+(Optionally) Compile-time CSV parser written in C++17.
 
 ## Features
 - Header-only.
