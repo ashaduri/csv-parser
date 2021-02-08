@@ -76,10 +76,10 @@ using namespace std::string_view_literals;
 
     parser.parse(data,
         [&matrix](std::size_t row, std::size_t column,
-                std::string_view cell_data, [[maybe_unused]] Csv::CellTypeHint hint)
+                std::string_view cell_data, Csv::CellTypeHint hint)
                 constexpr mutable
         {
-            matrix[column][row] = Csv::CellStringReference(cell_data);
+            matrix[column][row] = Csv::CellStringReference(cell_data, hint);
         }
     );
     

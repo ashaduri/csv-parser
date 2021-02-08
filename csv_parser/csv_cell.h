@@ -21,9 +21,10 @@ namespace Csv {
 
 /// Type hint associated with the cell to determine the type of the cell value
 enum class CellTypeHint {
-	Empty,
-	Quoted,
-	Unquoted,
+	Empty,  ///< Empty data (no quotes, no whitespace)
+	StringWithEscapedQuotes,  ///< Quoted or unquoted string with escaped quotes inside.
+	StringWithoutEscapedQuotes,  ///< Quoted or unquoted string without any escaped quotes inside
+	UnquotedData,  ///< Unquoted data, no escaped quotes inside.
 };
 
 
@@ -57,9 +58,11 @@ class CellReference {
 		[[nodiscard]] inline std::optional<double> getDouble() const;
 
 		/// Get stored cell reference as string_view.
-		/// This cell may (or may not) contain the original two consecutive double-quotes.
+		/// This cell may contain escaped consecutive double-quotes inside; if has_escaped_quotes is not nullptr,
+		/// *has_escaped_quotes will reflect that.
 		/// \return std::nullopt on type mismatch
-		[[nodiscard]] inline std::optional<std::string_view> getOriginalStringView() const;
+		[[nodiscard]] inline std::optional<std::string_view> getOriginalStringView(
+				bool* has_escaped_quotes = nullptr) const;
 
 		/// Get stored cell reference as string.
 		/// The string has collapsed consecutive double-quotes inside.
@@ -71,11 +74,17 @@ class CellReference {
 		/// Empty value (empty unquoted cell)
 		struct Empty { };
 
+		/// String value
+		struct String {
+			std::string_view view;
+			bool has_escaped_quotes = false;
+		};
+
 		/// Stored data
 		std::variant<
 			Empty,
 			double,
-			std::string_view
+			String
 		> value_ = Empty();
 };
 
@@ -130,7 +139,7 @@ class CellDoubleValue {
 
 		/// Constructor
 		inline explicit CellDoubleValue(std::string_view cell,
-				[[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
+				CellTypeHint hint_ignored = CellTypeHint::UnquotedData);
 
 		/// Get the cell value if cell type is Double.
 		/// \return std::numeric_limits<double>::quiet_NaN() on error.
@@ -152,21 +161,27 @@ class CellStringReference {
 		constexpr CellStringReference() = default;
 
 		/// Constructor
-		inline constexpr explicit CellStringReference(std::string_view cell,
-				[[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
+		inline constexpr CellStringReference(std::string_view cell, CellTypeHint hint);
 
 		/// Get stored cell reference as string_view.
-		/// This cell may (or may not) contain the original two consecutive double-quotes.
+		/// This cell may contain escaped consecutive double-quotes inside; if has_escaped_quotes is not nullptr,
+		/// *has_escaped_quotes will reflect that.
 		/// \return default-initialized string_view if cell type is not String.
-		[[nodiscard]] inline constexpr std::string_view getOriginalStringView() const;
+		[[nodiscard]] inline constexpr std::string_view getOriginalStringView(
+				bool* has_escaped_quotes = nullptr) const;
 
 		/// Get stored cell reference as string.
 		/// The string has collapsed consecutive double-quotes inside.
 		[[nodiscard]] inline std::string getCleanString();
 
 	private:
+
 		/// Stored data
 		std::string_view value_;
+
+		/// If the stored data may contain unescaped double-quotes, this is set to true.
+		bool has_escaped_quotes_ = false;
+
 };
 
 
@@ -180,8 +195,7 @@ class CellStringValue {
 		CellStringValue() = default;
 
 		/// Constructor
-		inline explicit CellStringValue(std::string_view cell,
-				[[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
+		inline CellStringValue(std::string_view cell, CellTypeHint hint);
 
 		/// Get stored cell reference as string.
 		/// The string has collapsed consecutive double-quotes inside.
@@ -221,16 +235,19 @@ CellReference::CellReference(std::string_view cell, CellTypeHint hint)
 			// Nothing, value is empty
 			break;
 
-		case CellTypeHint::Quoted:
-			// Assume all quoted cells are strings
-			value_ = cell;
+		case CellTypeHint::StringWithEscapedQuotes:
+			value_ = String{.view = cell, .has_escaped_quotes = true};
 			break;
 
-		case CellTypeHint::Unquoted:
+		case CellTypeHint::StringWithoutEscapedQuotes:
+			value_ = String{.view = cell, .has_escaped_quotes = false};
+			break;
+
+		case CellTypeHint::UnquotedData:
 			if (auto double_value = readDouble(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
-				value_ = cell;
+				value_ = String{.view = cell, .has_escaped_quotes = false};
 			}
 			break;
 	}
@@ -246,7 +263,7 @@ CellType CellReference::getType() const
 	if (std::holds_alternative<double>(value_)) {
 		return CellType::Double;
 	}
-	if (std::holds_alternative<std::string_view>(value_)) {
+	if (std::holds_alternative<String>(value_)) {
 		return CellType::String;
 	}
 	throw std::bad_variant_access();
@@ -271,10 +288,14 @@ std::optional<double> CellReference::getDouble() const
 
 
 
-std::optional<std::string_view> CellReference::getOriginalStringView() const
+std::optional<std::string_view> CellReference::getOriginalStringView(bool* has_escaped_quotes) const
 {
-	if (std::holds_alternative<std::string_view>(value_)) {
-		return std::get<std::string_view>(value_);
+	if (std::holds_alternative<String>(value_)) {
+		const auto& s = std::get<String>(value_);
+		if (has_escaped_quotes) {
+			*has_escaped_quotes = s.has_escaped_quotes;
+		}
+		return s.view;
 	}
 	return {};
 }
@@ -283,8 +304,9 @@ std::optional<std::string_view> CellReference::getOriginalStringView() const
 
 std::optional<std::string> CellReference::getCleanString() const
 {
-	if (std::holds_alternative<std::string_view>(value_)) {
-		return cleanString(std::get<std::string_view>(value_));
+	if (std::holds_alternative<String>(value_)) {
+		const auto& s = std::get<String>(value_);
+		return s.has_escaped_quotes ? cleanString(s.view) : std::string(s.view);
 	}
 	return {};
 }
@@ -300,16 +322,19 @@ CellValue::CellValue(std::string_view cell, CellTypeHint hint)
 			// Nothing, value is empty
 			break;
 
-		case CellTypeHint::Quoted:
-			// Assume all quoted cells are strings
+		case CellTypeHint::StringWithEscapedQuotes:
 			value_ = cleanString(cell);
 			break;
 
-		case CellTypeHint::Unquoted:
+		case CellTypeHint::StringWithoutEscapedQuotes:
+			value_ = std::string(cell);
+			break;
+
+		case CellTypeHint::UnquotedData:
 			if (auto double_value = readDouble(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
-				value_ = cleanString(cell);
+				value_ = std::string(cell);
 			}
 			break;
 	}
@@ -381,16 +406,18 @@ double CellDoubleValue::getValue() const
 
 
 
-constexpr CellStringReference::CellStringReference(std::string_view cell,
-		[[maybe_unused]] CellTypeHint hint_ignored)
+constexpr CellStringReference::CellStringReference(std::string_view cell, CellTypeHint hint)
+		: value_(cell),
+		has_escaped_quotes_(hint == CellTypeHint::StringWithEscapedQuotes)
+{ }
+
+
+
+constexpr std::string_view CellStringReference::getOriginalStringView(bool* has_escaped_quotes) const
 {
-	value_ = cell;
-}
-
-
-
-constexpr std::string_view CellStringReference::getOriginalStringView() const
-{
+	if (has_escaped_quotes) {
+		*has_escaped_quotes = has_escaped_quotes_;
+	}
 	return value_;
 }
 
@@ -398,18 +425,16 @@ constexpr std::string_view CellStringReference::getOriginalStringView() const
 
 std::string CellStringReference::getCleanString()
 {
-	return cleanString(value_);
+	return has_escaped_quotes_ ? cleanString(value_) : std::string(value_);
 }
 
 
 
 
 
-CellStringValue::CellStringValue(std::string_view cell,
-		[[maybe_unused]] CellTypeHint hint_ignored)
-{
-	value_ = cleanString(cell);
-}
+CellStringValue::CellStringValue(std::string_view cell, CellTypeHint hint)
+		: value_(hint == CellTypeHint::StringWithEscapedQuotes ? cleanString(cell) : std::string(cell))
+{ }
 
 
 
@@ -417,6 +442,8 @@ const std::string& CellStringValue::getString() const
 {
 	return value_;
 }
+
+
 
 
 

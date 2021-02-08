@@ -147,12 +147,14 @@ class Parser {
 			MachineState machine_state = MachineState::AtCellStart;
 			std::size_t current_row = 0, current_column = 0;
 			std::string_view current_value;
+			bool escaped_quotes_encountered = false;
 
 
 			/// Switch to next column
 			constexpr void switchToNextColumn()
 			{
 				current_value = std::string_view();
+				escaped_quotes_encountered = false;
 				++current_column;
 			}
 
@@ -162,6 +164,7 @@ class Parser {
 			[[nodiscard]] constexpr std::size_t switchToNextLine(const std::string_view& data, std::size_t current_pos)
 			{
 				current_value = std::string_view();
+				escaped_quotes_encountered = false;
 				current_column = 0;
 				++current_row;
 				// If it's CR, and the next character is LF, skip LF as well.
@@ -183,6 +186,7 @@ class Parser {
 			constexpr void restartCurrentValue(const std::string_view& data, std::size_t current_pos, std::size_t size)
 			{
 				current_value = data.substr(current_pos, size);
+				escaped_quotes_encountered = false;
 			}
 
 		};
@@ -268,7 +272,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 									CellTypeHint::Empty);
 						} else {
 							storeCell(state.current_row, state.current_column, state.current_value,
-									CellTypeHint::Unquoted);
+									CellTypeHint::StringWithoutEscapedQuotes);
 						}
 						state.switchToNextColumn();
 						break;
@@ -280,7 +284,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 									CellTypeHint::Empty);
 						} else {
 							storeCell(state.current_row, state.current_column, state.current_value,
-									CellTypeHint::Unquoted);
+									CellTypeHint::StringWithoutEscapedQuotes);
 						}
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
@@ -295,7 +299,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 										CellTypeHint::Empty);
 							} else {
 								storeCell(state.current_row, state.current_column, state.current_value,
-										CellTypeHint::Unquoted);
+										CellTypeHint::StringWithoutEscapedQuotes);
 							}
 						}
 						return;
@@ -327,7 +331,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 					case ',':
 						// Whitespace-only string cell. Store the value.
 						storeCell(state.current_row, state.current_column, state.current_value,
-								CellTypeHint::Unquoted);
+								CellTypeHint::StringWithoutEscapedQuotes);
 						state.machine_state = MachineState::AtCellStart;
 						state.switchToNextColumn();
 						break;
@@ -335,7 +339,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 					case '\n':
 						// Whitespace-only string cell (last value on the line). Store the value.
 						storeCell(state.current_row, state.current_column, state.current_value,
-								CellTypeHint::Unquoted);
+								CellTypeHint::StringWithoutEscapedQuotes);
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
 						pos = state.switchToNextLine(data, pos);
@@ -343,7 +347,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 					case std::char_traits<char>::eof():
 						// Store the value, exit.
 						storeCell(state.current_row, state.current_column, state.current_value,
-								CellTypeHint::Unquoted);
+								CellTypeHint::StringWithoutEscapedQuotes);
 						return;
 					default:
 						// Continue an unquoted cell
@@ -368,11 +372,14 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 						// Continue unquoted string, consume the second quote as well.
 						++pos;
 						state.increaseCurrentValueSize(2);
+						state.escaped_quotes_encountered = true;  // used for hints when storing the value
 						break;
 					case ',':
 						// End of cell. Store the value.
 						storeCell(state.current_row, state.current_column, state.current_value,
-								CellTypeHint::Unquoted);
+								state.escaped_quotes_encountered ?
+										CellTypeHint::StringWithEscapedQuotes : CellTypeHint::UnquotedData
+						);
 						state.machine_state = MachineState::AtCellStart;
 						state.switchToNextColumn();
 						break;
@@ -380,7 +387,9 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 					case '\n':
 						// End of line. Store the value.
 						storeCell(state.current_row, state.current_column, state.current_value,
-								CellTypeHint::Unquoted);
+								state.escaped_quotes_encountered ?
+										CellTypeHint::StringWithEscapedQuotes : CellTypeHint::UnquotedData
+						);
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
 						pos = state.switchToNextLine(data, pos);
@@ -388,7 +397,9 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 					case std::char_traits<char>::eof():
 						// Store the value, exit.
 						storeCell(state.current_row, state.current_column, state.current_value,
-								CellTypeHint::Unquoted);
+								state.escaped_quotes_encountered ?
+										CellTypeHint::StringWithEscapedQuotes : CellTypeHint::UnquotedData
+						);
 						return;
 					default:
 						// Continue an unquoted cell
@@ -408,12 +419,14 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 							// Continue quoted string, consume the second quote as well.
 							++pos;
 							state.increaseCurrentValueSize(2);
+							state.escaped_quotes_encountered = true;  // used for hints when storing the value
 						} else {
-							// End of quoted value. Store the value.
-							// Discard the ending quote as well, but provide a "Quoted" hint when the quoted cell
-							// is stored.
+							// End of quoted value. Store the value, discard the ending quote.
 							storeCell(state.current_row, state.current_column, state.current_value,
-									CellTypeHint::Quoted);
+									state.escaped_quotes_encountered ?
+											CellTypeHint::StringWithEscapedQuotes :
+											CellTypeHint::StringWithoutEscapedQuotes
+							);
 							state.machine_state = MachineState::AfterQuotedValue;
 						}
 						break;

@@ -266,8 +266,8 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 			Csv::Parser parser;
 			std::array<std::array<Csv::CellStringReference, 2>, 2> matrix;
 			parser.parse("abc,def\n5,6",
-				[&matrix](std::size_t row, std::size_t column, std::string_view cell_data, [[maybe_unused]] Csv::CellTypeHint hint) constexpr mutable {
-					matrix[column][row] = Csv::CellStringReference(cell_data);
+				[&matrix](std::size_t row, std::size_t column, std::string_view cell_data, Csv::CellTypeHint hint) constexpr mutable {
+					matrix[column][row] = Csv::CellStringReference(cell_data, hint);
 				}
 			);
 			if (matrix[0][0].getOriginalStringView() != "abc"sv) {
