@@ -236,18 +236,18 @@ CellReference::CellReference(std::string_view cell, CellTypeHint hint)
 			break;
 
 		case CellTypeHint::StringWithEscapedQuotes:
-			value_ = String{.view = cell, .has_escaped_quotes = true};
+			value_ = String{cell, true};
 			break;
 
 		case CellTypeHint::StringWithoutEscapedQuotes:
-			value_ = String{.view = cell, .has_escaped_quotes = false};
+			value_ = String{cell, false};
 			break;
 
 		case CellTypeHint::UnquotedData:
 			if (auto double_value = readDouble(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
-				value_ = String{.view = cell, .has_escaped_quotes = false};
+				value_ = String{cell, false};
 			}
 			break;
 	}
