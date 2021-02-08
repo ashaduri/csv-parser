@@ -15,12 +15,15 @@ License: Zlib
 
 
 
+namespace Csv {
+
+
 
 /// Exception thrown on CSV parse error.
-class CsvParseError : public std::runtime_error {
+class ParseError : public std::runtime_error {
 
 	public:
-		CsvParseError(std::size_t row, std::size_t column)
+		ParseError(std::size_t row, std::size_t column)
 				: runtime_error(createWhatString(row, column)),
 				row_(row), column_(column)
 		{ }
@@ -58,7 +61,7 @@ class CsvParseError : public std::runtime_error {
 
 
 /// The main CSV Parser class
-class CsvParser {
+class Parser {
 	public:
 
 		/// If set to true, empty cell type is a separate type from (empty) string.
@@ -71,15 +74,15 @@ class CsvParser {
 
 		/// Parse CSV string data and store the results using a callback function.
 		/// Callback function signature:
-		/// void func(std::size_t row, std::size_t column, std::string_view cell_data, CsvCellTypeHint hint)
-		/// \throws CsvParseError
+		/// void func(std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint)
+		/// \throws ParseError
 		template<typename StoreCellFunction>
 		constexpr void parse(std::string_view data, StoreCellFunction storeCell) const;
 
 
 		/// Parse CSV string data into a vector of columns.
-		/// Accepts types like std::vector<std::vector<CsvCellReference>>.
-		/// \throws CsvParseError
+		/// Accepts types like std::vector<std::vector<CellReference>>.
+		/// \throws ParseError
 		template<typename Vector2D>
 		void parseTo(std::string_view data, Vector2D& values) const;
 
@@ -173,14 +176,14 @@ class CsvParser {
 
 
 
-constexpr void CsvParser::useEmptyCellType(bool use_empty_cell_type)
+constexpr void Parser::useEmptyCellType(bool use_empty_cell_type)
 {
 	use_empty_cell_type_ = use_empty_cell_type;
 }
 
 
 
-constexpr bool CsvParser::useEmptyCellType() const
+constexpr bool Parser::useEmptyCellType() const
 {
 	return use_empty_cell_type_;
 }
@@ -188,7 +191,7 @@ constexpr bool CsvParser::useEmptyCellType() const
 
 
 template <typename StoreCellFunction>
-constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCell) const
+constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell) const
 {
 	ParserState state;
 
@@ -215,9 +218,9 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 					case ',':
 						// Empty cell. Store the value.
 						if (use_empty_cell_type_) {
-							storeCell(state.current_row, state.current_column, std::string_view(), CsvCellTypeHint::Empty);
+							storeCell(state.current_row, state.current_column, std::string_view(), CellTypeHint::Empty);
 						} else {
-							storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+							storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						}
 						state.switchToNextColumn();
 						break;
@@ -225,9 +228,9 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 					case '\n':
 						// Empty cell (trailing comma; last value on the line). Store the value.
 						if (use_empty_cell_type_) {
-							storeCell(state.current_row, state.current_column, std::string_view(), CsvCellTypeHint::Empty);
+							storeCell(state.current_row, state.current_column, std::string_view(), CellTypeHint::Empty);
 						} else {
-							storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+							storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						}
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
@@ -238,9 +241,9 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 						// Otherwise, it's a last empty cell on the line after comma (aka trailing comma).
 						if (state.current_column != 0) {
 							if (use_empty_cell_type_) {
-								storeCell(state.current_row, state.current_column, std::string_view(), CsvCellTypeHint::Empty);
+								storeCell(state.current_row, state.current_column, std::string_view(), CellTypeHint::Empty);
 							} else {
-								storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+								storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 							}
 						}
 						return;
@@ -270,21 +273,21 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 						break;
 					case ',':
 						// Whitespace-only string cell. Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						state.switchToNextColumn();
 						break;
 					case '\r':
 					case '\n':
 						// Whitespace-only string cell (last value on the line). Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
 						pos = state.switchToNextLine(data, pos);
 						break;
 					case std::char_traits<char>::eof():
 						// Store the value, exit.
-						storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						return;
 					default:
 						// Continue an unquoted cell
@@ -304,7 +307,7 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 						// We don't accept unescaped double quotes in unquoted strings because it leads
 						// to ambiguity.
 						if (peek(data, pos) != '\"') {
-							throw CsvParseError(state.current_row, state.current_column);
+							throw ParseError(state.current_row, state.current_column);
 						}
 						// Continue unquoted string, consume the second quote as well.
 						++pos;
@@ -312,21 +315,21 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 						break;
 					case ',':
 						// End of cell. Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						state.switchToNextColumn();
 						break;
 					case '\r':
 					case '\n':
 						// End of line. Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
 						pos = state.switchToNextLine(data, pos);
 						break;
 					case std::char_traits<char>::eof():
 						// Store the value, exit.
-						storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
 						return;
 					default:
 						// Continue an unquoted cell
@@ -349,13 +352,13 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 						} else {
 							// End of quoted value. Store the value.
 							// Discard the ending quote as well, but provide a "Quoted" hint when the quoted cell is stored.
-							storeCell(state.current_row, state.current_column, state.current_value, CsvCellTypeHint::Quoted);
+							storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Quoted);
 							state.machine_state = MachineState::AfterQuotedValue;
 						}
 						break;
 					case std::char_traits<char>::eof():
 						// EOF while inside a quoted cell, throw an error.
-						throw CsvParseError(state.current_row, state.current_column);
+						throw ParseError(state.current_row, state.current_column);
 					default:
 						// Continue an unquoted cell
 						state.increaseCurrentValueSize(1);
@@ -388,7 +391,7 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 						return;
 					default:
 						// Anything else is an error
-						throw CsvParseError(state.current_row, state.current_column);
+						throw ParseError(state.current_row, state.current_column);
 				}
 				break;
 			}
@@ -399,10 +402,10 @@ constexpr void CsvParser::parse(std::string_view data, StoreCellFunction storeCe
 
 
 template<typename Vector2D>
-void CsvParser::parseTo(std::string_view data, Vector2D& values) const
+void Parser::parseTo(std::string_view data, Vector2D& values) const
 {
 	Vector2D parsed_values;
-	parse(data, [&](std::size_t row, std::size_t column, std::string_view cell_data, CsvCellTypeHint hint) {
+	parse(data, [&](std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint) {
 		if (parsed_values.size() < (column + 1)) {
 			parsed_values.resize(column + 1);
 		}
@@ -414,6 +417,10 @@ void CsvParser::parseTo(std::string_view data, Vector2D& values) const
 	std::swap(values, parsed_values);
 }
 
+
+
+
+}  // end ns
 
 
 

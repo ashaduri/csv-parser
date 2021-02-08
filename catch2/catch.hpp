@@ -1996,7 +1996,7 @@ namespace Catch {
         template <typename T>
         struct is_range_impl<T, typename void_type<decltype(begin(std::declval<T>()))>::type> : std::true_type {
         };
-    } // namespace csv_detail
+    } // namespace detail
 
     template <typename T>
     struct is_range : detail::is_range_impl<T> {
@@ -9660,7 +9660,7 @@ namespace detail {
     auto ComposableParserImpl<DerivedT>::operator|( T const &other ) const -> Parser {
         return Parser() | static_cast<DerivedT const &>( *this ) | other;
     }
-} // namespace csv_detail
+} // namespace detail
 
 // A Combined parser
 using detail::Parser;
@@ -13666,7 +13666,7 @@ namespace Catch {
             std::ostream& stream() const override { return m_os; }
         };
 
-    }} // namespace anon::csv_detail
+    }} // namespace anon::detail
 
     ///////////////////////////////////////////////////////////////////////////
 

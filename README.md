@@ -1,4 +1,4 @@
-# C++17 CSV Parser (csv-parser)
+# Csv::Parser (csv-parser) - A C++17 CSV Parser
 (Optionally) Compile-time CSV parser written in C++17.
 
 ## Features
@@ -26,15 +26,15 @@ std::string_view data = "abc,def\n5,6"sv;
 // Let "values" be a vector of columns.
 // After parsing, each element will contain a std::string_view referencing
 // a part of the original data.
-std::vector<std::vector<CsvCellReference>> values;
+std::vector<std::vector<Csv::CellReference>> values;
 
-CsvParser parser;
+Csv::Parser parser;
 
 try {
-    // parseTo() throws CsvParseError on error.
+    // parseTo() throws Csv::ParseError on error.
     parser.parseTo(data, values);
 }
-catch(CsvParseError& ex) {
+catch(Csv::ParseError& ex) {
     std::cerr << "CSV parse error: " << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
@@ -43,10 +43,10 @@ assert(values.size() == 2);
 assert(values[0].size() == 2);
 assert(values[1].size() == 2);
 
-assert(values[0][0].getType() == CsvCellType::String);
-assert(values[1][0].getType() == CsvCellType::String);
-assert(values[0][1].getType() == CsvCellType::Double);
-assert(values[1][1].getType() == CsvCellType::Double);
+assert(values[0][0].getType() == Csv::CellType::String);
+assert(values[1][0].getType() == Csv::CellType::String);
+assert(values[0][1].getType() == Csv::CellType::Double);
+assert(values[1][1].getType() == Csv::CellType::Double);
 
 std::cout << "Column 0, row 0: " << values[0][0].getCleanString().value() << std::endl;  // abc
 std::cout << "Column 1, row 0: " << values[1][0].getCleanString().value() << std::endl;  // def
@@ -71,15 +71,15 @@ using namespace std::string_view_literals;
     // Data to parse
     std::string_view data = "abc,def\n5,6"sv;
 
-    CsvParser parser;
-    std::array<std::array<CsvCellStringReference, 2>, 2> matrix;
+    Csv::Parser parser;
+    std::array<std::array<Csv::CellStringReference, 2>, 2> matrix;
 
     parser.parse(data,
         [&matrix](std::size_t row, std::size_t column,
-                std::string_view cell_data, [[maybe_unused]] CsvCellTypeHint hint)
+                std::string_view cell_data, [[maybe_unused]] Csv::CellTypeHint hint)
                 constexpr mutable
         {
-            matrix[column][row] = CsvCellStringReference(cell_data);
+            matrix[column][row] = Csv::CellStringReference(cell_data);
         }
     );
     

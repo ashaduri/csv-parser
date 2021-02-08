@@ -22,10 +22,10 @@ namespace {
 
 
 
-CsvCellReference getParsedValue(std::string_view data, std::size_t row = 0, std::size_t col = 0)
+Csv::CellReference getParsedValue(std::string_view data, std::size_t row = 0, std::size_t col = 0)
 {
-	CsvParser parser;
-	std::vector<std::vector<CsvCellReference>> values;
+	Csv::Parser parser;
+	std::vector<std::vector<Csv::CellReference>> values;
 	parser.parseTo(data, values);
 	return values.at(col).at(row);
 }
@@ -35,7 +35,7 @@ CsvCellReference getParsedValue(std::string_view data, std::size_t row = 0, std:
 double getParsedDoubleValue(std::string_view data)
 {
 	auto value = getParsedValue(data);
-	REQUIRE(value.getType() == CsvCellType::Double);
+	REQUIRE(value.getType() == Csv::CellType::Double);
 	return value.getDouble().value();
 }
 
@@ -44,15 +44,15 @@ double getParsedDoubleValue(std::string_view data)
 std::string getParsedStringValue(std::string_view data)
 {
 	auto value = getParsedValue(data);
-	REQUIRE(value.getType() == CsvCellType::String);
+	REQUIRE(value.getType() == Csv::CellType::String);
 	return value.getCleanString().value();
 }
 
 
 
-void parseValues(std::string_view data, std::vector<std::vector<CsvCellReference>>& values)
+void parseValues(std::string_view data, std::vector<std::vector<Csv::CellReference>>& values)
 {
-	CsvParser parser;
+	Csv::Parser parser;
 	REQUIRE_NOTHROW(parser.parseTo(data, values));
 }
 
@@ -123,7 +123,7 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 	}
 
 	SECTION("can parse empty values") {
-		std::vector<std::vector<CsvCellReference>> values;
+		std::vector<std::vector<Csv::CellReference>> values;
 		REQUIRE_NOTHROW(parseValues(","sv, values));
 		REQUIRE(values.size() == 2);
 		REQUIRE(values.at(0).size() == 1);
@@ -133,7 +133,7 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 	}
 
 	SECTION("parsing empty value does nothing") {
-		std::vector<std::vector<CsvCellReference>> values;
+		std::vector<std::vector<Csv::CellReference>> values;
 		REQUIRE_NOTHROW(parseValues(""sv, values));
 		REQUIRE(values.size() == 0);
 	}
@@ -178,7 +178,7 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 	}
 
 	SECTION("can parse multiple values") {
-		std::vector<std::vector<CsvCellReference>> values;
+		std::vector<std::vector<Csv::CellReference>> values;
 
 		SECTION("parse a single line") {
 			REQUIRE_NOTHROW(parseValues("a,b", values));
@@ -204,31 +204,31 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 			REQUIRE(values.at(7).size() == 1);
 			REQUIRE(values.at(8).size() == 1);
 
-			REQUIRE(values.at(0).at(0).getType() == CsvCellType::Double);
+			REQUIRE(values.at(0).at(0).getType() == Csv::CellType::Double);
 			REQUIRE(values.at(0).at(0).getDouble().value() == 5.);
 
-			REQUIRE(values.at(1).at(0).getType() == CsvCellType::Double);
+			REQUIRE(values.at(1).at(0).getType() == Csv::CellType::Double);
 			REQUIRE(values.at(1).at(0).getDouble().value() == std::numeric_limits<double>::infinity());
 
 			REQUIRE(values.at(2).at(0).isEmpty());
 
-			REQUIRE(values.at(3).at(0).getType() == CsvCellType::String);
+			REQUIRE(values.at(3).at(0).getType() == Csv::CellType::String);
 			REQUIRE(values.at(3).at(0).getOriginalStringView() == "string"s);
 
-			REQUIRE(values.at(4).at(0).getType() == CsvCellType::String);
+			REQUIRE(values.at(4).at(0).getType() == Csv::CellType::String);
 			REQUIRE(values.at(4).at(0).getOriginalStringView() == "quoted string"sv);
 
-			REQUIRE(values.at(5).at(0).getType() == CsvCellType::String);
+			REQUIRE(values.at(5).at(0).getType() == Csv::CellType::String);
 			REQUIRE(values.at(5).at(0).getOriginalStringView() == "with\"\"quote"sv);
 			REQUIRE(values.at(5).at(0).getCleanString() == "with\"quote"s);
 
-			REQUIRE(values.at(6).at(0).getType() == CsvCellType::String);
+			REQUIRE(values.at(6).at(0).getType() == Csv::CellType::String);
 			REQUIRE(values.at(6).at(0).getOriginalStringView() == "multi\r\nline"sv);
 
-			REQUIRE(values.at(7).at(0).getType() == CsvCellType::String);
+			REQUIRE(values.at(7).at(0).getType() == Csv::CellType::String);
 			REQUIRE(values.at(7).at(0).getOriginalStringView() == "with,commas"sv);
 
-			REQUIRE(values.at(8).at(0).getType() == CsvCellType::Empty);
+			REQUIRE(values.at(8).at(0).getType() == Csv::CellType::Empty);
 		}
 
 
@@ -238,16 +238,16 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 			REQUIRE(values.size() == 1);
 			REQUIRE(values.at(0).size() == 4);
 
-			REQUIRE(values.at(0).at(0).getType() == CsvCellType::String);
+			REQUIRE(values.at(0).at(0).getType() == Csv::CellType::String);
 			REQUIRE(values.at(0).at(0).getOriginalStringView() == "multi\r\nline"sv);
 
-			REQUIRE(values.at(0).at(1).getType() == CsvCellType::String);
+			REQUIRE(values.at(0).at(1).getType() == Csv::CellType::String);
 			REQUIRE(values.at(0).at(1).getOriginalStringView() == "text"sv);
 
-			REQUIRE(values.at(0).at(2).getType() == CsvCellType::String);
+			REQUIRE(values.at(0).at(2).getType() == Csv::CellType::String);
 			REQUIRE(values.at(0).at(2).getOriginalStringView() == "with many"sv);
 
-			REQUIRE(values.at(0).at(3).getType() == CsvCellType::String);
+			REQUIRE(values.at(0).at(3).getType() == Csv::CellType::String);
 			REQUIRE(values.at(0).at(3).getOriginalStringView() == "endings"sv);
 		}
 
@@ -259,10 +259,10 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 			REQUIRE(values[0].size() == 2);
 			REQUIRE(values[1].size() == 2);
 
-			REQUIRE(values[0][0].getType() == CsvCellType::String);
-			REQUIRE(values[1][0].getType() == CsvCellType::String);
-			REQUIRE(values[0][1].getType() == CsvCellType::Double);
-			REQUIRE(values[1][1].getType() == CsvCellType::Double);
+			REQUIRE(values[0][0].getType() == Csv::CellType::String);
+			REQUIRE(values[1][0].getType() == Csv::CellType::String);
+			REQUIRE(values[0][1].getType() == Csv::CellType::Double);
+			REQUIRE(values[1][1].getType() == Csv::CellType::Double);
 
 			REQUIRE(values.at(0).at(0).getCleanString() == "abc"s);
 			REQUIRE(values.at(1).at(0).getCleanString() == "def"s);
@@ -273,31 +273,31 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 
 
 	SECTION("returns error when invalid") {
-		CsvParser parser;
-		std::vector<std::vector<CsvCellReference>> values;
+		Csv::Parser parser;
+		std::vector<std::vector<Csv::CellReference>> values;
 
 		SECTION("quote missing") {
-			REQUIRE_THROWS_AS(parser.parseTo("\"abc", values), CsvParseError);
+			REQUIRE_THROWS_AS(parser.parseTo("\"abc", values), Csv::ParseError);
 		}
 		SECTION("quote missing with newline") {
-			REQUIRE_THROWS_AS(parser.parseTo("\"abc\n", values), CsvParseError);
+			REQUIRE_THROWS_AS(parser.parseTo("\"abc\n", values), Csv::ParseError);
 		}
 		SECTION("quote missing with comma") {
-			REQUIRE_THROWS_AS(parser.parseTo("\"abc,\n", values), CsvParseError);
+			REQUIRE_THROWS_AS(parser.parseTo("\"abc,\n", values), Csv::ParseError);
 		}
 		SECTION("quote missing on new line") {
-			REQUIRE_THROWS_AS(parser.parseTo("abc,\n\"cde,", values), CsvParseError);
+			REQUIRE_THROWS_AS(parser.parseTo("abc,\n\"cde,", values), Csv::ParseError);
 		}
 	}
 
 
 	SECTION("supports constexpr") {
 		[[maybe_unused]] constexpr bool result = []() constexpr {
-			CsvParser parser;
-			std::array<std::array<CsvCellStringReference, 2>, 2> matrix;
+			Csv::Parser parser;
+			std::array<std::array<Csv::CellStringReference, 2>, 2> matrix;
 			parser.parse("abc,def\n5,6",
-				[&matrix](std::size_t row, std::size_t column, std::string_view cell_data, [[maybe_unused]] CsvCellTypeHint hint) constexpr mutable {
-					matrix[column][row] = CsvCellStringReference(cell_data);
+				[&matrix](std::size_t row, std::size_t column, std::string_view cell_data, [[maybe_unused]] Csv::CellTypeHint hint) constexpr mutable {
+					matrix[column][row] = Csv::CellStringReference(cell_data);
 				}
 			);
 			if (matrix[0][0].getOriginalStringView() != "abc"sv) {

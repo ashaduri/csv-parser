@@ -20,15 +20,15 @@ int main()
 		// Data to parse
 		std::string_view data = "abc,def\n5,6"sv;
 
-		CsvParser parser;
-		std::array<std::array<CsvCellStringReference, 2>, 2> matrix;
+		Csv::Parser parser;
+		std::array<std::array<Csv::CellStringReference, 2>, 2> matrix;
 
 		parser.parse(data,
 			[&matrix](std::size_t row, std::size_t column,
-					std::string_view cell_data, [[maybe_unused]] CsvCellTypeHint hint)
+					std::string_view cell_data, [[maybe_unused]] Csv::CellTypeHint hint)
 					constexpr mutable
 			{
-				matrix[column][row] = CsvCellStringReference(cell_data);
+				matrix[column][row] = Csv::CellStringReference(cell_data);
 			}
 		);
 		if (matrix[0][0].getOriginalStringView() != "abc"sv) {

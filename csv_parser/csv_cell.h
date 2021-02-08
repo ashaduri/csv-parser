@@ -15,8 +15,12 @@ License: Zlib
 
 
 
+namespace Csv {
+
+
+
 /// Type hint associated with the cell to determine the type of the cell value
-enum class CsvCellTypeHint {
+enum class CellTypeHint {
 	Empty,
 	Quoted,
 	Unquoted,
@@ -24,7 +28,7 @@ enum class CsvCellTypeHint {
 
 
 /// Parsed cell type
-enum class CsvCellType {
+enum class CellType {
 	Empty,
 	Double,
 	String,
@@ -33,17 +37,17 @@ enum class CsvCellType {
 
 
 /// A value of a cell, referencing the data in original CSV text (if the data is of string type).
-class CsvCellReference {
+class CellReference {
 	public:
 
 		/// Constructor
-		CsvCellReference() = default;
+		CellReference() = default;
 
 		/// Constructor
-		inline CsvCellReference(std::string_view cell, CsvCellTypeHint hint);
+		inline CellReference(std::string_view cell, CellTypeHint hint);
 
 		/// Get cell type
-		[[nodiscard]] inline CsvCellType getType() const;
+		[[nodiscard]] inline CellType getType() const;
 
 		/// Check whether the cell is of Empty type
 		[[nodiscard]] inline bool isEmpty() const;
@@ -78,17 +82,17 @@ class CsvCellReference {
 
 
 /// A value of a cell. The object owns its data and does not reference the original CSV text.
-class CsvCellValue {
+class CellValue {
 	public:
 
 		/// Constructor
-		CsvCellValue() = default;
+		CellValue() = default;
 
 		/// Constructor
-		inline CsvCellValue(std::string_view cell, CsvCellTypeHint hint);
+		inline CellValue(std::string_view cell, CellTypeHint hint);
 
 		/// Get cell type
-		[[nodiscard]] inline CsvCellType getType() const;
+		[[nodiscard]] inline CellType getType() const;
 
 		/// Check whether the cell is of Empty type
 		[[nodiscard]] inline bool isEmpty() const;
@@ -118,14 +122,14 @@ class CsvCellValue {
 
 
 /// A value of a cell. All cell contents are treated as doubles. The data is owned by this object.
-class CsvCellDoubleValue {
+class CellDoubleValue {
 	public:
 
 		/// Constructor
-		CsvCellDoubleValue() = default;
+		CellDoubleValue() = default;
 
 		/// Constructor
-		inline explicit CsvCellDoubleValue(std::string_view cell, [[maybe_unused]] CsvCellTypeHint hint_ignored = CsvCellTypeHint::Empty);
+		inline explicit CellDoubleValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
 
 		/// Get the cell value if cell type is Double.
 		/// \return std::numeric_limits<double>::quiet_NaN() on error.
@@ -140,14 +144,14 @@ class CsvCellDoubleValue {
 
 /// A value of a cell, referencing the data in original CSV text.
 /// All cell contents are treated as strings.
-class CsvCellStringReference {
+class CellStringReference {
 	public:
 
 		/// Constructor
-		constexpr CsvCellStringReference() = default;
+		constexpr CellStringReference() = default;
 
 		/// Constructor
-		inline constexpr explicit CsvCellStringReference(std::string_view cell, [[maybe_unused]] CsvCellTypeHint hint_ignored = CsvCellTypeHint::Empty);
+		inline constexpr explicit CellStringReference(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
 
 		/// Get stored cell reference as string_view.
 		/// This cell may (or may not) contain the original two consecutive double-quotes.
@@ -167,14 +171,14 @@ class CsvCellStringReference {
 
 /// A value of a cell. The object owns its data and does not reference the original CSV text.
 /// All cell contents are treated as strings.
-class CsvCellStringValue {
+class CellStringValue {
 	public:
 
 		/// Constructor
-		CsvCellStringValue() = default;
+		CellStringValue() = default;
 
 		/// Constructor
-		inline explicit CsvCellStringValue(std::string_view cell, [[maybe_unused]] CsvCellTypeHint hint_ignored = CsvCellTypeHint::Empty);
+		inline explicit CellStringValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
 
 		/// Get stored cell reference as string.
 		/// The string has collapsed consecutive double quotes inside.
@@ -189,14 +193,14 @@ class CsvCellStringValue {
 
 
 
-/// Collapse every occurrence of 2 consecutive double-quotes to one.
-inline std::string csvCleanString(std::string_view view);
+/// Unescape a string - collapse every occurrence of 2 consecutive double-quotes to one.
+inline std::string cleanString(std::string_view view);
 
 
 /// Try to read a double value from string data.
 /// Unless the string data (with optional whitespace on either or both sides) completely
 /// represents a serialized double, std::nullopt is returned.
-inline std::optional<double> csvReadDouble(std::string_view cell);
+inline std::optional<double> readDouble(std::string_view cell);
 
 
 
@@ -207,20 +211,20 @@ inline std::optional<double> csvReadDouble(std::string_view cell);
 
 
 
-CsvCellReference::CsvCellReference(std::string_view cell, CsvCellTypeHint hint)
+CellReference::CellReference(std::string_view cell, CellTypeHint hint)
 {
 	switch (hint) {
-		case CsvCellTypeHint::Empty:
+		case CellTypeHint::Empty:
 			// Nothing, value is empty
 			break;
 
-		case CsvCellTypeHint::Quoted:
+		case CellTypeHint::Quoted:
 			// Assume all quoted cells are strings
 			value_ = cell;
 			break;
 
-		case CsvCellTypeHint::Unquoted:
-			if (auto double_value = csvReadDouble(cell); double_value.has_value()) {
+		case CellTypeHint::Unquoted:
+			if (auto double_value = readDouble(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
 				value_ = cell;
@@ -231,30 +235,30 @@ CsvCellReference::CsvCellReference(std::string_view cell, CsvCellTypeHint hint)
 
 
 
-CsvCellType CsvCellReference::getType() const
+CellType CellReference::getType() const
 {
 	if (std::holds_alternative<Empty>(value_)) {
-		return CsvCellType::Empty;
+		return CellType::Empty;
 	}
 	if (std::holds_alternative<double>(value_)) {
-		return CsvCellType::Double;
+		return CellType::Double;
 	}
 	if (std::holds_alternative<std::string_view>(value_)) {
-		return CsvCellType::String;
+		return CellType::String;
 	}
 	throw std::bad_variant_access();
 }
 
 
 
-bool CsvCellReference::isEmpty() const
+bool CellReference::isEmpty() const
 {
 	return std::holds_alternative<Empty>(value_);
 }
 
 
 
-std::optional<double> CsvCellReference::getDouble() const
+std::optional<double> CellReference::getDouble() const
 {
 	if (std::holds_alternative<double>(value_)) {
 		return std::get<double>(value_);
@@ -264,7 +268,7 @@ std::optional<double> CsvCellReference::getDouble() const
 
 
 
-std::optional<std::string_view> CsvCellReference::getOriginalStringView() const
+std::optional<std::string_view> CellReference::getOriginalStringView() const
 {
 	if (std::holds_alternative<std::string_view>(value_)) {
 		return std::get<std::string_view>(value_);
@@ -274,10 +278,10 @@ std::optional<std::string_view> CsvCellReference::getOriginalStringView() const
 
 
 
-std::optional<std::string> CsvCellReference::getCleanString() const
+std::optional<std::string> CellReference::getCleanString() const
 {
 	if (std::holds_alternative<std::string_view>(value_)) {
-		return csvCleanString(std::get<std::string_view>(value_));
+		return cleanString(std::get<std::string_view>(value_));
 	}
 	return {};
 }
@@ -286,23 +290,23 @@ std::optional<std::string> CsvCellReference::getCleanString() const
 
 
 
-CsvCellValue::CsvCellValue(std::string_view cell, CsvCellTypeHint hint)
+CellValue::CellValue(std::string_view cell, CellTypeHint hint)
 {
 	switch (hint) {
-		case CsvCellTypeHint::Empty:
+		case CellTypeHint::Empty:
 			// Nothing, value is empty
 			break;
 
-		case CsvCellTypeHint::Quoted:
+		case CellTypeHint::Quoted:
 			// Assume all quoted cells are strings
-			value_ = csvCleanString(cell);
+			value_ = cleanString(cell);
 			break;
 
-		case CsvCellTypeHint::Unquoted:
-			if (auto double_value = csvReadDouble(cell); double_value.has_value()) {
+		case CellTypeHint::Unquoted:
+			if (auto double_value = readDouble(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
-				value_ = csvCleanString(cell);
+				value_ = cleanString(cell);
 			}
 			break;
 	}
@@ -310,30 +314,30 @@ CsvCellValue::CsvCellValue(std::string_view cell, CsvCellTypeHint hint)
 
 
 
-CsvCellType CsvCellValue::getType() const
+CellType CellValue::getType() const
 {
 	if (std::holds_alternative<Empty>(value_)) {
-		return CsvCellType::Empty;
+		return CellType::Empty;
 	}
 	if (std::holds_alternative<double>(value_)) {
-		return CsvCellType::Double;
+		return CellType::Double;
 	}
 	if (std::holds_alternative<std::string>(value_)) {
-		return CsvCellType::String;
+		return CellType::String;
 	}
 	throw std::bad_variant_access();
 }
 
 
 
-bool CsvCellValue::isEmpty() const
+bool CellValue::isEmpty() const
 {
 	return std::holds_alternative<Empty>(value_);
 }
 
 
 
-std::optional<double> CsvCellValue::getDouble() const
+std::optional<double> CellValue::getDouble() const
 {
 	if (std::holds_alternative<double>(value_)) {
 		return std::get<double>(value_);
@@ -343,7 +347,7 @@ std::optional<double> CsvCellValue::getDouble() const
 
 
 
-std::optional<std::string> CsvCellValue::getString() const
+std::optional<std::string> CellValue::getString() const
 {
 	if (std::holds_alternative<std::string>(value_)) {
 		return std::get<std::string>(value_);
@@ -355,16 +359,16 @@ std::optional<std::string> CsvCellValue::getString() const
 
 
 
-CsvCellDoubleValue::CsvCellDoubleValue(std::string_view cell, [[maybe_unused]] CsvCellTypeHint hint_ignored)
+CellDoubleValue::CellDoubleValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored)
 {
-	if (auto double_value = csvReadDouble(cell); double_value.has_value()) {
+	if (auto double_value = readDouble(cell); double_value.has_value()) {
 		value_ = double_value.value();
 	}
 }
 
 
 
-double CsvCellDoubleValue::getValue() const
+double CellDoubleValue::getValue() const
 {
 	return value_;
 }
@@ -373,44 +377,44 @@ double CsvCellDoubleValue::getValue() const
 
 
 
-constexpr CsvCellStringReference::CsvCellStringReference(std::string_view cell, [[maybe_unused]] CsvCellTypeHint hint_ignored)
+constexpr CellStringReference::CellStringReference(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored)
 {
 	value_ = cell;
 }
 
 
 
-constexpr std::string_view CsvCellStringReference::getOriginalStringView() const
+constexpr std::string_view CellStringReference::getOriginalStringView() const
 {
 	return value_;
 }
 
 
 
-std::string CsvCellStringReference::getCleanString()
+std::string CellStringReference::getCleanString()
 {
-	return csvCleanString(value_);
+	return cleanString(value_);
 }
 
 
 
 
 
-CsvCellStringValue::CsvCellStringValue(std::string_view cell, [[maybe_unused]] CsvCellTypeHint hint_ignored)
+CellStringValue::CellStringValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored)
 {
-	value_ = csvCleanString(cell);
+	value_ = cleanString(cell);
 }
 
 
 
-const std::string& CsvCellStringValue::getString() const
+const std::string& CellStringValue::getString() const
 {
 	return value_;
 }
 
 
 
-std::string csvCleanString(std::string_view view)
+std::string cleanString(std::string_view view)
 {
 	std::string s;
 	s.reserve(view.size());
@@ -426,7 +430,7 @@ std::string csvCleanString(std::string_view view)
 
 
 
-std::optional<double> csvReadDouble(std::string_view cell)
+std::optional<double> readDouble(std::string_view cell)
 {
 	// Trim right whitespace (left whitespace is ignored by stod()).
 	std::size_t size = cell.size();
@@ -459,6 +463,8 @@ std::optional<double> csvReadDouble(std::string_view cell)
 }
 
 
+
+}  // end ns
 
 
 

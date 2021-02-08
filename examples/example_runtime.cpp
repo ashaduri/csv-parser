@@ -23,15 +23,15 @@ int main()
 	// Let "values" be a vector of columns.
 	// After parsing, each element will contain a std::string_view referencing
 	// a part of the original data.
-	std::vector<std::vector<CsvCellReference>> values;
+	std::vector<std::vector<Csv::CellReference>> values;
 
-	CsvParser parser;
+	Csv::Parser parser;
 
 	try {
-		// parseTo() throws CsvParseError on error.
+		// parseTo() throws ParseError on error.
 		parser.parseTo(data, values);
 	}
-	catch(CsvParseError& ex) {
+	catch(Csv::ParseError& ex) {
 		std::cerr << "CSV parse error: " << ex.what() << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -40,10 +40,10 @@ int main()
 	assert(values[0].size() == 2);
 	assert(values[1].size() == 2);
 
-	assert(values[0][0].getType() == CsvCellType::String);
-	assert(values[1][0].getType() == CsvCellType::String);
-	assert(values[0][1].getType() == CsvCellType::Double);
-	assert(values[1][1].getType() == CsvCellType::Double);
+	assert(values[0][0].getType() == Csv::CellType::String);
+	assert(values[1][0].getType() == Csv::CellType::String);
+	assert(values[0][1].getType() == Csv::CellType::Double);
+	assert(values[1][1].getType() == Csv::CellType::Double);
 
 	std::cout << "Column 0, row 0: " << values[0][0].getCleanString().value() << std::endl;  // abc
 	std::cout << "Column 1, row 0: " << values[1][0].getCleanString().value() << std::endl;  // def
