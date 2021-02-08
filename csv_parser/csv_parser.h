@@ -48,7 +48,8 @@ class ParseError : public std::runtime_error {
 		/// Create a string for \ref what() to return
 		static std::string createWhatString(std::size_t row, std::size_t column)
 		{
-			return std::string("CSV parse error at row ") + std::to_string(row + 1) + ", column " + std::to_string(column + 1);
+			return std::string("CSV parse error at row ") + std::to_string(row + 1)
+					+ ", column " + std::to_string(column + 1);
 		}
 
 
@@ -60,7 +61,49 @@ class ParseError : public std::runtime_error {
 
 
 
-/// The main CSV Parser class
+/*
+ * The main CSV parser class.
+ *
+ * CSV format is defined by RFC 4180:
+ * https://www.ietf.org/rfc/rfc4180.txt
+ *
+ * RFC 4180 CSV format summary:
+ * - Each line ends with CRLF.
+ * - CRLF is optional for the last line.
+ * - There is an optional header line (in the same format as the rest of the data).
+ * - Each line must have the same number of fields. Spaces are part of the cells. There is no trailing comma on the
+ * line.
+ * - A field _may_ be enclosed in double-quotes. If the field is not enclosed in double-quotes, there may not be a
+ * double quote inside.
+ * - Fields containing double-quotes, commas, and newlines _must_ be enclosed in double-quotes.
+ * - Double-quotes are escaped by repeating them, like "".
+ *
+ * Considerations:
+ * - There may be implementations using other line breaks than CRLF.
+ * - A parser should be liberal in accepting variations of CSV format.
+ *
+ * Our parser implementation details:
+ * - Cell types are determined automatically. There is a String, Double, and Empty cell type.
+ * - Numeric cell must be unquoted to be treated as Double.
+ * - Numeric cells may be preceded and/or followed by a whitespace (space or tab) (for easy loading of hand-typed
+ * numeric data).
+ * - Standard C++, Matlab, and a few implementation-specific floating point formats are accepted as doubles.
+ * - A cell is treated as Empty type only if it's completely empty and unquoted; calling
+ * parser.useEmptyCellType(false) disables the Empty type completely.
+ * - If a quoted cell is preceded and/or followed by whitespace (space or tab), this whitespace is ignored.
+ * - A cell is treated as Double only if it's unquoted and can be completely parsed as a string representation of a
+ * double.
+ * - Escaped quotes inside unquoted strings are supported, but only if they are not at the beginning of a cell
+ * (ignoring the whitespace).
+ * - DOS, UNIX, Mac line endings are supported; Excel on Mac uses/used Mac endings for CSV.
+ * - Line ending format inside strings is preserved.
+ * - getOriginalStringView() methods may return escaped double-quotes; string_views are read-only and we
+ * cannot touch the original CSV data; use getCleanString() methods if you need unescaped data.
+ *
+ * Ambiguity notice:
+ * Empty cell (Invalid QVariant) and empty string (empty std::string) are serialized the same by Excel.
+ * We read them as Invalid QVariants, but QVariant::toByteArray() will give empty std::strings as expected.
+ */
 class Parser {
 	public:
 
@@ -74,7 +117,7 @@ class Parser {
 
 		/// Parse CSV string data and store the results using a callback function.
 		/// Callback function signature:
-		/// void func(std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint)
+		/// void func(std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint).
 		/// \throws ParseError
 		template<typename StoreCellFunction>
 		constexpr void parse(std::string_view data, StoreCellFunction storeCell) const;
@@ -147,7 +190,8 @@ class Parser {
 
 		/// Read a character from \ref data at position (current_pos + advance_chars).
 		/// \return std::char_traits<char>::eof() if position is past the data's contents.
-		[[nodiscard]] static constexpr std::char_traits<char>::int_type peek(const std::string_view& data, std::size_t current_pos, std::size_t advance_chars = 1)
+		[[nodiscard]] static constexpr std::char_traits<char>::int_type peek(const std::string_view& data,
+				std::size_t current_pos, std::size_t advance_chars = 1)
 		{
 			if ((current_pos + advance_chars) < data.size()) {
 				return std::char_traits<char>::to_int_type(data[current_pos + advance_chars]);
@@ -158,7 +202,8 @@ class Parser {
 
 		/// Read a character from \ref data at position \ref pos.
 		/// \return std::char_traits<char>::eof() if position is past the data's contents.
-		[[nodiscard]] static constexpr std::char_traits<char>::int_type readChar(const std::string_view& data, std::size_t pos)
+		[[nodiscard]] static constexpr std::char_traits<char>::int_type readChar(
+				const std::string_view& data, std::size_t pos)
 		{
 			return peek(data, pos, 0);
 		}
@@ -211,16 +256,19 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 						break;
 					case '\"':
 						// Start a quoted cell.
-						// Discard the starting quote as well, but provide a "Quoted" hint when the quoted cell is stored.
+						// Discard the starting quote as well, but provide a "Quoted" hint when the quoted cell
+						// is stored.
 						state.machine_state = MachineState::InsideQuotedValue;
 						state.restartCurrentValue(data, pos + 1, 0);
 						break;
 					case ',':
 						// Empty cell. Store the value.
 						if (use_empty_cell_type_) {
-							storeCell(state.current_row, state.current_column, std::string_view(), CellTypeHint::Empty);
+							storeCell(state.current_row, state.current_column, std::string_view(),
+									CellTypeHint::Empty);
 						} else {
-							storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+							storeCell(state.current_row, state.current_column, state.current_value,
+									CellTypeHint::Unquoted);
 						}
 						state.switchToNextColumn();
 						break;
@@ -228,9 +276,11 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 					case '\n':
 						// Empty cell (trailing comma; last value on the line). Store the value.
 						if (use_empty_cell_type_) {
-							storeCell(state.current_row, state.current_column, std::string_view(), CellTypeHint::Empty);
+							storeCell(state.current_row, state.current_column, std::string_view(),
+									CellTypeHint::Empty);
 						} else {
-							storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+							storeCell(state.current_row, state.current_column, state.current_value,
+									CellTypeHint::Unquoted);
 						}
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
@@ -241,9 +291,11 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 						// Otherwise, it's a last empty cell on the line after comma (aka trailing comma).
 						if (state.current_column != 0) {
 							if (use_empty_cell_type_) {
-								storeCell(state.current_row, state.current_column, std::string_view(), CellTypeHint::Empty);
+								storeCell(state.current_row, state.current_column, std::string_view(),
+										CellTypeHint::Empty);
 							} else {
-								storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+								storeCell(state.current_row, state.current_column, state.current_value,
+										CellTypeHint::Unquoted);
 							}
 						}
 						return;
@@ -267,27 +319,31 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 						break;
 					case '\"':
 						// Quote encountered. Discard the leading whitespace, start a quoted cell.
-						// Discard the starting quote as well, but provide a "Quoted" hint when the quoted cell is stored.
+						// Discard the starting quote as well, but provide a "Quoted" hint when the quoted cell
+						// is stored.
 						state.machine_state = MachineState::InsideQuotedValue;
 						state.restartCurrentValue(data, pos + 1, 0);
 						break;
 					case ',':
 						// Whitespace-only string cell. Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value,
+								CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						state.switchToNextColumn();
 						break;
 					case '\r':
 					case '\n':
 						// Whitespace-only string cell (last value on the line). Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value,
+								CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
 						pos = state.switchToNextLine(data, pos);
 						break;
 					case std::char_traits<char>::eof():
 						// Store the value, exit.
-						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value,
+								CellTypeHint::Unquoted);
 						return;
 					default:
 						// Continue an unquoted cell
@@ -304,7 +360,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 				switch(current_char) {
 					case '\"':
 						// Make sure the next character is also a quote, otherwise it's a format error.
-						// We don't accept unescaped double quotes in unquoted strings because it leads
+						// We don't accept unescaped double-quotes in unquoted strings because it leads
 						// to ambiguity.
 						if (peek(data, pos) != '\"') {
 							throw ParseError(state.current_row, state.current_column);
@@ -315,21 +371,24 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 						break;
 					case ',':
 						// End of cell. Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value,
+								CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						state.switchToNextColumn();
 						break;
 					case '\r':
 					case '\n':
 						// End of line. Store the value.
-						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value,
+								CellTypeHint::Unquoted);
 						state.machine_state = MachineState::AtCellStart;
 						// Handle CRLF if needed and set the state to the next line, cell start.
 						pos = state.switchToNextLine(data, pos);
 						break;
 					case std::char_traits<char>::eof():
 						// Store the value, exit.
-						storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Unquoted);
+						storeCell(state.current_row, state.current_column, state.current_value,
+								CellTypeHint::Unquoted);
 						return;
 					default:
 						// Continue an unquoted cell
@@ -351,8 +410,10 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCell)
 							state.increaseCurrentValueSize(2);
 						} else {
 							// End of quoted value. Store the value.
-							// Discard the ending quote as well, but provide a "Quoted" hint when the quoted cell is stored.
-							storeCell(state.current_row, state.current_column, state.current_value, CellTypeHint::Quoted);
+							// Discard the ending quote as well, but provide a "Quoted" hint when the quoted cell
+							// is stored.
+							storeCell(state.current_row, state.current_column, state.current_value,
+									CellTypeHint::Quoted);
 							state.machine_state = MachineState::AfterQuotedValue;
 						}
 						break;

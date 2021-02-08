@@ -62,7 +62,7 @@ class CellReference {
 		[[nodiscard]] inline std::optional<std::string_view> getOriginalStringView() const;
 
 		/// Get stored cell reference as string.
-		/// The string has collapsed consecutive double quotes inside.
+		/// The string has collapsed consecutive double-quotes inside.
 		/// \return std::nullopt on type mismatch
 		[[nodiscard]] inline std::optional<std::string> getCleanString() const;
 
@@ -102,7 +102,7 @@ class CellValue {
 		[[nodiscard]] inline std::optional<double> getDouble() const;
 
 		/// Get stored cell reference as string.
-		/// The string has collapsed consecutive double quotes inside.
+		/// The string has collapsed consecutive double-quotes inside.
 		/// \return std::nullopt on type mismatch
 		[[nodiscard]] inline std::optional<std::string> getString() const;
 
@@ -129,7 +129,8 @@ class CellDoubleValue {
 		CellDoubleValue() = default;
 
 		/// Constructor
-		inline explicit CellDoubleValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
+		inline explicit CellDoubleValue(std::string_view cell,
+				[[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
 
 		/// Get the cell value if cell type is Double.
 		/// \return std::numeric_limits<double>::quiet_NaN() on error.
@@ -151,7 +152,8 @@ class CellStringReference {
 		constexpr CellStringReference() = default;
 
 		/// Constructor
-		inline constexpr explicit CellStringReference(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
+		inline constexpr explicit CellStringReference(std::string_view cell,
+				[[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
 
 		/// Get stored cell reference as string_view.
 		/// This cell may (or may not) contain the original two consecutive double-quotes.
@@ -159,7 +161,7 @@ class CellStringReference {
 		[[nodiscard]] inline constexpr std::string_view getOriginalStringView() const;
 
 		/// Get stored cell reference as string.
-		/// The string has collapsed consecutive double quotes inside.
+		/// The string has collapsed consecutive double-quotes inside.
 		[[nodiscard]] inline std::string getCleanString();
 
 	private:
@@ -178,10 +180,11 @@ class CellStringValue {
 		CellStringValue() = default;
 
 		/// Constructor
-		inline explicit CellStringValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
+		inline explicit CellStringValue(std::string_view cell,
+				[[maybe_unused]] CellTypeHint hint_ignored = CellTypeHint::Empty);
 
 		/// Get stored cell reference as string.
-		/// The string has collapsed consecutive double quotes inside.
+		/// The string has collapsed consecutive double-quotes inside.
 		[[nodiscard]] inline const std::string& getString() const;
 
 	private:
@@ -198,8 +201,8 @@ inline std::string cleanString(std::string_view view);
 
 
 /// Try to read a double value from string data.
-/// Unless the string data (with optional whitespace on either or both sides) completely
-/// represents a serialized double, std::nullopt is returned.
+/// Unless the string data (with optional whitespace on either or both sides) completely represents a serialized
+/// double, std::nullopt is returned.
 inline std::optional<double> readDouble(std::string_view cell);
 
 
@@ -359,7 +362,8 @@ std::optional<std::string> CellValue::getString() const
 
 
 
-CellDoubleValue::CellDoubleValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored)
+CellDoubleValue::CellDoubleValue(std::string_view cell,
+		[[maybe_unused]] CellTypeHint hint_ignored)
 {
 	if (auto double_value = readDouble(cell); double_value.has_value()) {
 		value_ = double_value.value();
@@ -377,7 +381,8 @@ double CellDoubleValue::getValue() const
 
 
 
-constexpr CellStringReference::CellStringReference(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored)
+constexpr CellStringReference::CellStringReference(std::string_view cell,
+		[[maybe_unused]] CellTypeHint hint_ignored)
 {
 	value_ = cell;
 }
@@ -400,7 +405,8 @@ std::string CellStringReference::getCleanString()
 
 
 
-CellStringValue::CellStringValue(std::string_view cell, [[maybe_unused]] CellTypeHint hint_ignored)
+CellStringValue::CellStringValue(std::string_view cell,
+		[[maybe_unused]] CellTypeHint hint_ignored)
 {
 	value_ = cleanString(cell);
 }
@@ -445,8 +451,8 @@ std::optional<double> readDouble(std::string_view cell)
 	});
 
 	std::optional<double> double_value;
-	// As of 2020, from_chars() is broken for floats/doubles in most compilers, so we'll have to do with stod() for now,
-	// even if it means using current locale instead of C locale.
+	// As of 2020, from_chars() is broken for floats/doubles in most compilers, so we'll have to do with stod() for
+	// now, even if it means using current locale instead of C locale.
 	// While calling std::strtod() could be potentially faster, it also means we have to deal with some
 	// platform-specific errno and other peculiarities. std::stod() wraps that nicely.
 	try {

@@ -64,36 +64,6 @@ void parseValues(std::string_view data, std::vector<std::vector<Csv::CellReferen
 
 TEST_CASE("CsvLoadVariants", "[csv][parser]")
 {
-	/*
-	 * https://www.ietf.org/rfc/rfc4180.txt
-	 *
-	 * RFC 4180 CSV format summary:
-	 * 1. Each line ends with CRLF.
-	 * 2. CRLF is optional for the last line.
-	 * 3. There is an optional header line (in the same format as the rest of the data).
-	 * 4. Each line must have the same number of fields. Spaces are part of the cells. There is no trailing comma on the line.
-	 * 5. A field _may_ be enclosed in double quotes. If the field is not enclosed in double quotes, there may not be a double quote inside.
-	 * 6. Fields containing double quotes, commas, and newlines must be enclosed in double quotes.
-	 * 7. Double quotes are escaped by repeating them, like "".
-	 * Considerations:
-	 * There may be implementations using other line breaks than CRLF.
-	 *
-	 * Current parser implementation details:
-	 * 1. Number cells must be unquoted to be treated as numbers.
-	 * 2. Number cells may be preceded and/or followed by a whitespace (for loading manually written numeric data).
-	 * 3. Standard C++, Matlab, and a few implementation-specific double formats are accepted as numbers.
-	 * 4. Empty unquoted cells are treated as "empty".
-	 * 5. If a quoted cell is preceded and/or followed by whitespace, this whitespace is ignored.
-	 * 6. A cell is treated as number if it's unquoted and looks like a string representation of a number (completely).
-	 * 7. Escaped quotes inside unquoted strings are supported.
-	 * 8. DOS, UNIX, MAC line endings are supported; Excel on Mac uses MAC endings.
-	 * 9. Line ending format inside strings is preserved.
-	 *
-	 * Ambiguity notice:
-	 * Empty cell (Invalid QVariant) and empty string (empty std::string) are serialized the same by Excel.
-	 * We read them as Invalid QVariants, but QVariant::toByteArray() will give empty std::strings as expected.
-	 */
-
 	SECTION("can parse numbers") {
 		// RFC 4180
 		REQUIRE(getParsedDoubleValue("5"sv) == 5.);
@@ -135,7 +105,7 @@ TEST_CASE("CsvLoadVariants", "[csv][parser]")
 	SECTION("parsing empty value does nothing") {
 		std::vector<std::vector<Csv::CellReference>> values;
 		REQUIRE_NOTHROW(parseValues(""sv, values));
-		REQUIRE(values.size() == 0);
+		REQUIRE(values.empty());
 	}
 
 	SECTION("can parse string (byte array) values") {
