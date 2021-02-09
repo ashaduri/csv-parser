@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(csv-parser)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_library(compiler_warnings INTERFACE)
 target_compile_options(compiler_warnings INTERFACE
