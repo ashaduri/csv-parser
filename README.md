@@ -83,14 +83,11 @@ Csv::Parser parser;
 // parse into std::array<std::array<CellStringReference, rows>, columns>
 constexpr auto matrix = parser.parseTo2DArray<columns, rows>(data);
 
-// Verify the data at compile time
-[[maybe_unused]] constexpr bool result = [&matrix]() constexpr {
-    static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
-    static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
-    static_assert(matrix[0][1].getOriginalStringView() == "5"sv);
-    static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
-    return true;
-}();
+// Verify the data at compile time.
+static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
+static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
+static_assert(matrix[0][1].getOriginalStringView() == "5"sv);
+static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 ```
 
 
