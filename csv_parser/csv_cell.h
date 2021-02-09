@@ -28,7 +28,7 @@ enum class CellTypeHint {
 };
 
 
-/// Parsed cell type
+/// Type of the cell value
 enum class CellType {
 	Empty,
 	Double,
@@ -172,6 +172,7 @@ class CellStringReference {
 
 		/// Get stored cell reference as string.
 		/// The string has collapsed consecutive double-quotes inside.
+		/// \return empty string if cell type is not String.
 		[[nodiscard]] inline std::string getCleanString();
 
 	private:
