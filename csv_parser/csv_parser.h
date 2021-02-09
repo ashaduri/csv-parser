@@ -7,6 +7,7 @@ License: Zlib
 #define CSV_PARSER_H
 
 #include "csv_cell.h"
+#include "csv_error.h"
 
 #include <string>
 #include <stdexcept>
