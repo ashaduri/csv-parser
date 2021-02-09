@@ -469,7 +469,7 @@ void Parser::parseTo(std::string_view data, Vector2D& values) const
 		if (parsed_values[column].size() < (row + 1)) {
 			parsed_values[column].resize(row + 1);
 		}
-		parsed_values[column][row] = {cell_data, hint};
+		parsed_values[column][row] = typename Vector2D::value_type::value_type(cell_data, hint);
 	});
 	std::swap(values, parsed_values);
 }
