@@ -10,7 +10,6 @@ License: 0BSD (Zero-Clause BSD)
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
-#include <filesystem>
 #include <fstream>
 
 
@@ -65,14 +64,15 @@ int main(int argc, char** argv)
 	}
 
 	// Load file from parameter
-	std::filesystem::path input_file = (argv[1] ? argv[1] : "");
-	if (!std::filesystem::exists(input_file)) {
-		std::cerr << "Input file " << input_file << " does not exist." << std::endl;
+	std::string input_file = (argv[1] ? argv[1] : "");
+
+	// Read the file to string (inefficient method, but valid for this example)
+	std::ifstream ifs(input_file, std::ios::binary);
+	if (!ifs.is_open()) {
+		std::cerr << "Failed to open input file " << input_file << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	// Read the file to string (inefficient method, but valid for this example)
-	std::ifstream ifs(input_file);
 	std::string csv_data((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 
 	// Let "cell_refs" be a vector of columns.
