@@ -7,7 +7,6 @@ License: 0BSD (Zero-Clause BSD)
 
 #include <string_view>
 #include <cstdlib>
-#include <array>
 
 
 
@@ -15,34 +14,20 @@ int main()
 {
 	using namespace std::string_view_literals;
 
-	// Assign to constexpr variable to evaluate lambda at compile time
-	[[maybe_unused]] constexpr bool result = []() constexpr {
-		// Data to parse
-		std::string_view data = "abc,def\n5,6"sv;
+	constexpr std::string_view data = "\"abc\",def\n5,6"sv;
+	constexpr std::size_t columns = 2, rows = 2;
 
-		Csv::Parser parser;
-		std::array<std::array<Csv::CellStringReference, 2>, 2> matrix;
+	Csv::Parser parser;
 
-		parser.parse(data,
-			[&matrix](std::size_t row, std::size_t column,
-					std::string_view cell_data, Csv::CellTypeHint hint)
-					constexpr mutable
-			{
-				matrix[column][row] = Csv::CellStringReference(cell_data, hint);
-			}
-		);
-		if (matrix[0][0].getOriginalStringView() != "abc"sv) {
-			throw std::runtime_error("Parsing 0, 0 failed");
-		}
-		if (matrix[1][0].getOriginalStringView() != "def"sv) {
-			throw std::runtime_error("Parsing 1, 0 failed");
-		}
-		if (matrix[0][1].getOriginalStringView() != "5"sv) {
-			throw std::runtime_error("Parsing 0, 1 failed");
-		}
-		if (matrix[1][1].getOriginalStringView() != "6"sv) {
-			throw std::runtime_error("Parsing 1, 1 failed");
-		}
+	// parse into std::array<std::array<CellStringReference, rows>, columns>
+	constexpr auto matrix = parser.parseTo2DArray<columns, rows>(data);
+
+	// Verify the data at compile time
+	[[maybe_unused]] constexpr bool result = [&matrix]() constexpr {
+		static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
+		static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
+		static_assert(matrix[0][1].getOriginalStringView() == "5"sv);
+		static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 		return true;
 	}();
 

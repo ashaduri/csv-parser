@@ -513,26 +513,18 @@ TEST_CASE("CsvParser", "[csv][parser]")
 
 
 	SECTION("supports constexpr") {
-		[[maybe_unused]] constexpr bool result = []() constexpr {
-			Csv::Parser parser;
-			std::array<std::array<Csv::CellStringReference, 2>, 2> matrix;
-			parser.parse("abc,def\n5,6",
-				[&matrix](std::size_t row, std::size_t column, std::string_view cell_data, Csv::CellTypeHint hint) constexpr mutable {
-					matrix[column][row] = Csv::CellStringReference(cell_data, hint);
-				}
-			);
-			if (matrix[0][0].getOriginalStringView() != "abc"sv) {
-				throw std::runtime_error("Parsing 0, 0 failed");
-			}
-			if (matrix[1][0].getOriginalStringView() != "def"sv) {
-				throw std::runtime_error("Parsing 1, 0 failed");
-			}
-			if (matrix[0][1].getOriginalStringView() != "5"sv) {
-				throw std::runtime_error("Parsing 0, 1 failed");
-			}
-			if (matrix[1][1].getOriginalStringView() != "6"sv) {
-				throw std::runtime_error("Parsing 1, 1 failed");
-			}
+		constexpr std::string_view data = "\"abc\",def\n\"with \"\"quote inside\",6"sv;
+		Csv::Parser parser;
+
+		// parse into std::array<std::array<CellStringReference, rows>, columns>
+		constexpr auto matrix = parser.parseTo2DArray<2, 2>(data);
+
+		// Verify the data at compile time
+		[[maybe_unused]] constexpr bool result = [&matrix]() constexpr {
+			static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
+			static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
+			static_assert(matrix[0][1].getOriginalStringView() == "with \"\"quote inside"sv);
+			static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 			return true;
 		}();
 	}

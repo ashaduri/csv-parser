@@ -10,55 +10,12 @@ License: Zlib
 #include "csv_error.h"
 
 #include <string>
-#include <stdexcept>
-#include <functional>
 #include <string_view>
+#include <array>
 
 
 
 namespace Csv {
-
-
-
-/// Exception thrown on CSV parse error.
-class ParseError : public std::runtime_error {
-
-	public:
-		ParseError(std::size_t row, std::size_t column)
-				: runtime_error(createWhatString(row, column)),
-				row_(row), column_(column)
-		{ }
-
-
-		/// Return a 0-based row number where error occurred
-		[[nodiscard]] std::size_t row() const
-		{
-			return row_;
-		}
-
-
-		/// Return a 0-based column number where error occurred
-		[[nodiscard]] std::size_t column() const
-		{
-			return column_;
-		}
-
-
-	private:
-
-		/// Create a string for \ref what() to return
-		static std::string createWhatString(std::size_t row, std::size_t column)
-		{
-			return std::string("CSV parse error at row ") + std::to_string(row + 1)
-					+ ", column " + std::to_string(column + 1);
-		}
-
-
-		std::size_t row_ = 0;  ///< 0-based
-		std::size_t column_ = 0;  ///< 0-based
-
-};
-
 
 
 
@@ -128,7 +85,15 @@ class Parser {
 		/// Accepts types like std::vector<std::vector<CellReference>>.
 		/// \throws ParseError
 		template<typename Vector2D>
-		void parseTo(std::string_view data, Vector2D& values) const;
+		constexpr void parseTo(std::string_view data, Vector2D& values) const;
+
+
+		/// Parse CSV string to std::array<std::array<CellStringReference>>, an array of columns.
+		/// This method conveniently wraps parseTo() to simplify compile-time parsing.
+		/// \return std::array<std::array<Cell, rows>, columns>
+		/// \throws ParseError
+		template<std::size_t columns, std::size_t rows, typename Cell = CellStringReference>
+		constexpr auto parseTo2DArray(std::string_view data);
 
 
 	private:
@@ -460,7 +425,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCellF
 
 
 template<typename Vector2D>
-void Parser::parseTo(std::string_view data, Vector2D& values) const
+constexpr void Parser::parseTo(std::string_view data, Vector2D& values) const
 {
 	Vector2D parsed_values;
 	parse(data, [&](std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint) {
@@ -473,6 +438,25 @@ void Parser::parseTo(std::string_view data, Vector2D& values) const
 		parsed_values[column][row] = typename Vector2D::value_type::value_type(cell_data, hint);
 	});
 	std::swap(values, parsed_values);
+}
+
+
+
+template<std::size_t columns, std::size_t rows, typename Cell>
+constexpr auto Parser::parseTo2DArray(std::string_view data)
+{
+	std::array<std::array<Cell, rows>, columns> matrix;
+
+	parse(data,
+		[&matrix](std::size_t row, std::size_t column,
+				std::string_view cell_data, Csv::CellTypeHint hint)
+				constexpr mutable
+		{
+			matrix[column][row] = Cell(cell_data, hint);
+		}
+	);
+
+	return matrix;
 }
 
 
