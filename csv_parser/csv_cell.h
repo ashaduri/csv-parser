@@ -284,7 +284,6 @@ inline std::optional<double> readDouble(std::string_view cell);
 
 
 
-/// Constructor. Cleans up the data in cell, creating a buffer with.
 template<std::size_t Size>
 constexpr CellStringBuffer<Size>::CellStringBuffer(std::string_view cell, bool has_escaped_quotes)
 		: buffer_(prepareBuffer(cell, has_escaped_quotes))
@@ -292,7 +291,6 @@ constexpr CellStringBuffer<Size>::CellStringBuffer(std::string_view cell, bool h
 
 
 
-/// Check if the buffer was successfully created and contains a cleaned up string
 template<std::size_t Size>
 [[nodiscard]] constexpr bool CellStringBuffer<Size>::isValid() const noexcept
 {
@@ -300,9 +298,7 @@ template<std::size_t Size>
 }
 
 
-/// Return string view to stored buffer.
-/// The returned view has collapsed consecutive double-quotes inside.
-/// \throw std::out_of_range if buffer is invalid (of insufficient size)
+
 template<std::size_t Size>
 [[nodiscard]] constexpr std::string_view CellStringBuffer<Size>::getStringView() const
 {
@@ -313,9 +309,7 @@ template<std::size_t Size>
 }
 
 
-/// Return string view to stored buffer.
-/// The returned view has collapsed consecutive double-quotes inside.
-/// \return std::nullopt if buffer is invalid (of insufficient size)
+
 template<std::size_t Size>
 [[nodiscard]] constexpr std::optional<std::string_view> CellStringBuffer<Size>::getOptionalStringView() const noexcept
 {
@@ -327,7 +321,6 @@ template<std::size_t Size>
 
 
 
-/// Create a buffer object, with cleaned-up input in it
 template<std::size_t Size>
 constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::prepareBuffer(std::string_view input, bool
 has_escaped_quotes)
@@ -338,7 +331,7 @@ has_escaped_quotes)
 	if (has_escaped_quotes) {
 		return cleanString(input);
 	}
-	std::array<char, Size> buffer;
+	std::array<char, Size> buffer = { };
 	for (std::size_t pos = 0; pos < std::min(Size, input.size()); ++pos) {
 		buffer[pos] = input[pos];
 	}
@@ -347,7 +340,6 @@ has_escaped_quotes)
 
 
 
-/// Unescape a string view to newly created buffer
 template<std::size_t Size>
 constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::cleanString(std::string_view input)
 {
