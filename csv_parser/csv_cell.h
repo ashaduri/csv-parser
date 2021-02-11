@@ -12,6 +12,8 @@ License: Zlib
 #include <algorithm>
 #include <variant>
 #include <limits>
+#include <stdexcept>
+#include <array>
 
 
 
@@ -33,6 +35,47 @@ enum class CellType {
 	Empty,
 	Double,
 	String,
+};
+
+
+
+/// A helper class for compile-time buffer construction and string unescaping
+template<std::size_t Size>
+class CellStringBuffer {
+	public:
+
+		/// Constructor. Cleans up the data in cell, creating a buffer with.
+		constexpr inline explicit CellStringBuffer(std::string_view cell, bool has_escaped_quotes);
+
+		/// Check if the buffer was successfully created and contains a cleaned up string
+		[[nodiscard]] constexpr bool isValid() const noexcept;
+
+		/// Return string view to stored buffer.
+		/// The returned view has collapsed consecutive double-quotes inside.
+		/// \throw std::out_of_range if buffer is invalid (of insufficient size)
+		[[nodiscard]] constexpr std::string_view getStringView() const;
+
+		/// Return string view to stored buffer.
+		/// The returned view has collapsed consecutive double-quotes inside.
+		/// \return std::nullopt if buffer is invalid (of insufficient size)
+		[[nodiscard]] constexpr std::optional<std::string_view> getOptionalStringView() const noexcept;
+
+
+	private:
+
+		struct Buffer {
+			std::array<char, Size> buffer = { };
+			std::size_t size = 0;
+			bool valid = false;
+		};
+
+		/// Create a buffer object, with cleaned-up input in it
+		constexpr static Buffer prepareBuffer(std::string_view input, bool has_escaped_quotes);
+
+		/// Unescape a string view to newly created buffer
+		constexpr static Buffer cleanString(std::string_view input);
+
+		Buffer buffer_;
 };
 
 
@@ -152,6 +195,7 @@ class CellDoubleValue {
 
 
 
+
 /// A value of a cell, referencing the data in original CSV text.
 /// All cell contents are treated as strings.
 class CellStringReference {
@@ -161,19 +205,32 @@ class CellStringReference {
 		constexpr CellStringReference() = default;
 
 		/// Constructor
-		inline constexpr CellStringReference(std::string_view cell, CellTypeHint hint);
+		inline constexpr CellStringReference(std::string_view cell, CellTypeHint hint) noexcept;
 
 		/// Get stored cell reference as string_view.
+		/// Cell type is assumed to be String, regardless of autodetected type.
 		/// This cell may contain escaped consecutive double-quotes inside; if has_escaped_quotes is not nullptr,
 		/// *has_escaped_quotes will reflect that.
-		/// \return default-initialized string_view if cell type is not String.
 		[[nodiscard]] inline constexpr std::string_view getOriginalStringView(
-				bool* has_escaped_quotes = nullptr) const;
+				bool* has_escaped_quotes = nullptr) const noexcept;
 
 		/// Get stored cell reference as string.
+		/// Cell type is assumed to be String, regardless of autodetected type.
 		/// The string has collapsed consecutive double-quotes inside.
-		/// \return empty string if cell type is not String.
 		[[nodiscard]] inline std::string getCleanString();
+
+		/// Get a string buffer with collapsed consecutive double-quotes.
+		/// This function is useful in constexpr context to retrieve unescaped cell data.
+		/// \tparam BufferSize buffer size has to be at least strlen(getOriginalStringView()). Note
+		/// that buffer size is always checked, regardless of whether quotes had to be escaped or not.
+		/// Reserving additional character for terminating null is not required.
+		/// \return invalid buffer if BufferSize is too small.
+		template<std::size_t BufferSize>
+		[[nodiscard]] constexpr CellStringBuffer<BufferSize> getCleanStringBuffer() const
+		{
+			return CellStringBuffer<BufferSize>(value_, has_escaped_quotes_);
+		}
+
 
 	private:
 
@@ -199,6 +256,7 @@ class CellStringValue {
 		inline CellStringValue(std::string_view cell, CellTypeHint hint);
 
 		/// Get stored cell reference as string.
+		/// Cell type is assumed to be String, regardless of autodetected type.
 		/// The string has collapsed consecutive double-quotes inside.
 		[[nodiscard]] inline const std::string& getString() const;
 
@@ -206,7 +264,6 @@ class CellStringValue {
 		/// Stored data
 		std::string value_;
 };
-
 
 
 
@@ -223,8 +280,90 @@ inline std::optional<double> readDouble(std::string_view cell);
 
 
 
-
 // ----- Implementation
+
+
+
+/// Constructor. Cleans up the data in cell, creating a buffer with.
+template<std::size_t Size>
+constexpr CellStringBuffer<Size>::CellStringBuffer(std::string_view cell, bool has_escaped_quotes)
+		: buffer_(prepareBuffer(cell, has_escaped_quotes))
+{ }
+
+
+
+/// Check if the buffer was successfully created and contains a cleaned up string
+template<std::size_t Size>
+[[nodiscard]] constexpr bool CellStringBuffer<Size>::isValid() const noexcept
+{
+	return buffer_.valid;
+}
+
+
+/// Return string view to stored buffer.
+/// The returned view has collapsed consecutive double-quotes inside.
+/// \throw std::out_of_range if buffer is invalid (of insufficient size)
+template<std::size_t Size>
+[[nodiscard]] constexpr std::string_view CellStringBuffer<Size>::getStringView() const
+{
+	if (!buffer_.valid) {
+		throw std::out_of_range("Insufficient buffer size");
+	}
+	return {buffer_.buffer.data(), buffer_.size};
+}
+
+
+/// Return string view to stored buffer.
+/// The returned view has collapsed consecutive double-quotes inside.
+/// \return std::nullopt if buffer is invalid (of insufficient size)
+template<std::size_t Size>
+[[nodiscard]] constexpr std::optional<std::string_view> CellStringBuffer<Size>::getOptionalStringView() const noexcept
+{
+	if (!buffer_.valid) {
+		return std::nullopt;
+	}
+	return std::string_view{buffer_.buffer.data(), buffer_.size};
+}
+
+
+
+/// Create a buffer object, with cleaned-up input in it
+template<std::size_t Size>
+constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::prepareBuffer(std::string_view input, bool
+has_escaped_quotes)
+{
+	if (Size < input.size()) {
+		return Buffer{};
+	}
+	if (has_escaped_quotes) {
+		return cleanString(input);
+	}
+	std::array<char, Size> buffer;
+	for (std::size_t pos = 0; pos < std::min(Size, input.size()); ++pos) {
+		buffer[pos] = input[pos];
+	}
+	return Buffer{buffer, input.size(), true};
+}
+
+
+
+/// Unescape a string view to newly created buffer
+template<std::size_t Size>
+constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::cleanString(std::string_view input)
+{
+	std::array<char, Size> buffer = { };
+	std::size_t output_pos = 0;
+	for (std::size_t input_pos = 0; input_pos < std::min(Size, input.size()); ++input_pos) {
+		char c = input[input_pos];
+		buffer[output_pos] = c;
+		++output_pos;
+		if (c == '\"' && (input_pos + 1) < input.size() && input[input_pos + 1] == '\"') {
+			++input_pos;
+		}
+	}
+	return {buffer, output_pos, true};
+}
+
 
 
 
@@ -407,14 +546,14 @@ double CellDoubleValue::getValue() const
 
 
 
-constexpr CellStringReference::CellStringReference(std::string_view cell, CellTypeHint hint)
+constexpr CellStringReference::CellStringReference(std::string_view cell, CellTypeHint hint) noexcept
 		: value_(cell),
 		has_escaped_quotes_(hint == CellTypeHint::StringWithEscapedQuotes)
 { }
 
 
 
-constexpr std::string_view CellStringReference::getOriginalStringView(bool* has_escaped_quotes) const
+constexpr std::string_view CellStringReference::getOriginalStringView(bool* has_escaped_quotes) const noexcept
 {
 	if (has_escaped_quotes) {
 		*has_escaped_quotes = has_escaped_quotes_;

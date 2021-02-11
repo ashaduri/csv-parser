@@ -416,6 +416,16 @@ TEST_CASE("CsvParser", "[csv][parser]")
 			REQUIRE(cell_refs.at(1).at(0).getOriginalStringView(&has_escaped_quotes) == "c\"\"d"sv);
 			REQUIRE(has_escaped_quotes);
 			REQUIRE(cell_refs.at(1).at(0).getCleanString() == "c\"d"s);
+
+			auto large_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<4>();
+			REQUIRE(large_buffer.isValid());
+			REQUIRE(large_buffer.getStringView() == "c\"d"sv);  // throwing
+			REQUIRE(large_buffer.getOptionalStringView() == "c\"d"sv);
+
+			auto small_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<3>();
+			REQUIRE_FALSE(small_buffer.isValid());
+			REQUIRE_THROWS_AS(small_buffer.getStringView(), std::out_of_range);
+			REQUIRE_FALSE(small_buffer.getOptionalStringView().has_value());
 		}
 		{
 			bool has_escaped_quotes = false;
@@ -523,6 +533,19 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
 		static_assert(matrix[0][1].getOriginalStringView() == "with \"\"quote inside"sv);
 		static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
+
+		constexpr auto buffer_size = "with \"\"quote inside"sv.size();
+		constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
+		static_assert(buffer.getStringView() == "with \"quote inside"sv);
+		static_assert(buffer.isValid());
+		static_assert(buffer.getOptionalStringView().has_value());
+
+		// These will fail to compile due to small buffer size
+		// constexpr auto small_buffer_size = "with \"\"quote inside"sv.size() - 1;
+		// constexpr auto small_buffer = matrix[0][1].getCleanStringBuffer<small_buffer_size>();
+		// static_assert(small_buffer.getStringView() != "with \"quote inside"sv);
+		// static_assert(!small_buffer.isValid());
+		// static_assert(!small_buffer.getOptionalStringView().has_value());
 	}
 }
 
