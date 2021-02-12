@@ -524,7 +524,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 
 	SECTION("supports constexpr") {
 		constexpr std::string_view data = "\"abc\",def\n\"with \"\"quote inside\",6"sv;
-		Csv::Parser parser;
+		constexpr Csv::Parser parser;
 
 		// parse into std::array<std::array<CellStringReference, rows>, columns>
 		constexpr auto matrix = parser.parseTo2DArray<2, 2>(data);

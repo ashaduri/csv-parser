@@ -78,7 +78,7 @@ using namespace std::string_view_literals;
 constexpr std::string_view data = "\"abc\",def\n5,6"sv;
 constexpr std::size_t columns = 2, rows = 2;
 
-Csv::Parser parser;
+constexpr Csv::Parser parser;
 
 // parse into std::array<std::array<CellStringReference, rows>, columns>
 constexpr auto matrix = parser.parseTo2DArray<columns, rows>(data);

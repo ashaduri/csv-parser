@@ -57,10 +57,6 @@ namespace Csv {
  * - Line ending format inside strings is preserved.
  * - getOriginalStringView() methods may return escaped double-quotes; string_views are read-only and we
  * cannot touch the original CSV data; use getCleanString() methods if you need unescaped data.
- *
- * Ambiguity notice:
- * Empty cell (Invalid QVariant) and empty string (empty std::string) are serialized the same by Excel.
- * We read them as Invalid QVariants, but QVariant::toByteArray() will give empty std::strings as expected.
  */
 class Parser {
 	public:
@@ -93,7 +89,7 @@ class Parser {
 		/// \return std::array<std::array<Cell, rows>, columns>
 		/// \throws ParseError
 		template<std::size_t columns, std::size_t rows, typename Cell = CellStringReference>
-		constexpr auto parseTo2DArray(std::string_view data);
+		constexpr auto parseTo2DArray(std::string_view data) const;
 
 
 	private:
@@ -428,29 +424,32 @@ template<typename Vector2D>
 constexpr void Parser::parseTo(std::string_view data, Vector2D& values) const
 {
 	Vector2D parsed_values;
-	parse(data, [&](std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint) {
-		if (parsed_values.size() < (column + 1)) {
-			parsed_values.resize(column + 1);
+	parse(data,
+			[&parsed_values](std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint)
+		{
+			if (parsed_values.size() < (column + 1)) {
+				parsed_values.resize(column + 1);
+			}
+			if (parsed_values[column].size() < (row + 1)) {
+				parsed_values[column].resize(row + 1);
+			}
+			parsed_values[column][row] = typename Vector2D::value_type::value_type(cell_data, hint);
 		}
-		if (parsed_values[column].size() < (row + 1)) {
-			parsed_values[column].resize(row + 1);
-		}
-		parsed_values[column][row] = typename Vector2D::value_type::value_type(cell_data, hint);
-	});
+	);
 	std::swap(values, parsed_values);
 }
 
 
 
 template<std::size_t columns, std::size_t rows, typename Cell>
-constexpr auto Parser::parseTo2DArray(std::string_view data)
+constexpr auto Parser::parseTo2DArray(std::string_view data) const
 {
 	std::array<std::array<Cell, rows>, columns> matrix;
 
 	parse(data,
 		[&matrix](std::size_t row, std::size_t column,
 				std::string_view cell_data, Csv::CellTypeHint hint)
-				constexpr mutable
+				constexpr
 		{
 			matrix[column][row] = Cell(cell_data, hint);
 		}
