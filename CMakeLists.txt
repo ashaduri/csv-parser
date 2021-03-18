@@ -34,7 +34,7 @@ target_sources(catch2
 		${CMAKE_CURRENT_SOURCE_DIR}/catch2/catch.hpp
 )
 target_include_directories(catch2
-	INTERFACE SYSTEM
+	SYSTEM INTERFACE
 		${CMAKE_CURRENT_SOURCE_DIR}/catch2
 )
 
