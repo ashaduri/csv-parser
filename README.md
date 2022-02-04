@@ -63,9 +63,9 @@ std::cout << "Column 1, row 1: " << cell_refs[1][1].getDouble().value() << std::
 
 Currently, parsing at compile-time has some restrictions:
 - Only string_views are supported for output (no doubles).
-- Consecutive double-quotes are not collapsed in strings.
+- To collapse consecutive double-quotes in strings, a compile-time-allocated buffer has to be used.
 
-One (possibly useful) consequence of compile-time parsing is that a parse error causes compilation error. 
+One (possibly useful) consequence of compile-time parsing is that a parse error also causes a compilation error. 
 
 #### Example:
 ``` C++
@@ -75,7 +75,10 @@ One (possibly useful) consequence of compile-time parsing is that a parse error 
 
 using namespace std::string_view_literals;
 
-constexpr std::string_view data = "\"abc\",def\n5,6"sv;
+constexpr std::string_view data =
+R"(abc, "def"
+"with ""quote inside",6)";
+
 constexpr std::size_t columns = 2, rows = 2;
 
 constexpr Csv::Parser parser;
@@ -84,10 +87,20 @@ constexpr Csv::Parser parser;
 constexpr auto matrix = parser.parseTo2DArray<columns, rows>(data);
 
 // Verify the data at compile time.
+// Note that consecutive double-quotes are not collapsed when using
+// getOriginalStringView(). To collapse them, use the getCleanStringBuffer()
+// approach below.
 static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
 static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
-static_assert(matrix[0][1].getOriginalStringView() == "5"sv);
 static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
+
+// To support consecutive double-quote collapsing at compile-time, allocate a compile-time
+// buffer to place the clean string inside. The buffer size has to be at least that
+// of an uncollapsed string value.
+// If the buffer is too small, the code will simply not compile.
+constexpr auto buffer_size = R"(with ""quote inside)"sv.size();  // uncollapsed size
+constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
+static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
 ```
 
 
