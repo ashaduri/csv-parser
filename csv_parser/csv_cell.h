@@ -44,7 +44,7 @@ template<std::size_t Size>
 class CellStringBuffer {
 	public:
 
-		/// Constructor. Cleans up the data in cell, creating a buffer with.
+		/// Constructor. Cleans up the data in cell, creating a buffer of size Size.
 		constexpr inline explicit CellStringBuffer(std::string_view cell, bool has_escaped_quotes);
 
 		/// Check if the buffer was successfully created and contains a cleaned up string

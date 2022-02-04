@@ -55,7 +55,7 @@ namespace Csv {
  * (ignoring the whitespace).
  * - DOS, UNIX, Mac line endings are supported; Excel on Mac uses/used Mac endings for CSV.
  * - Line ending format inside strings is preserved.
- * - getOriginalStringView() methods may return escaped double-quotes; string_views are read-only and we
+ * - getOriginalStringView() methods may return escaped double-quotes; string_views are read-only, and we
  * cannot touch the original CSV data; use getCleanString() methods if you need unescaped data.
  */
 class Parser {
@@ -312,7 +312,7 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCellF
 				break;
 			}
 
-			// We encountered non-whitespace characters in a cell and it didn't start with a quote.
+			// We encountered non-whitespace characters in a cell, and it didn't start with a quote.
 			case MachineState::InsideUnquotedValue:
 			{
 				switch(current_char) {
