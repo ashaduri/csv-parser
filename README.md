@@ -1,5 +1,9 @@
 # Csv::Parser (csv-parser)
-Compile-time and runtime CSV parser written in C++17.
+***Compile-time and runtime CSV parser written in C++17***
+
+![GitHub](https://img.shields.io/github/license/ashaduri/csv-parser)
+![Language](https://img.shields.io/badge/language-ISO%20C++17-blue)
+
 
 ## Features
 - Header-only.
