@@ -64,6 +64,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		std::vector<std::vector<Csv::CellReference>> cell_refs;
 		Csv::Parser parser;
 		parser.useEmptyCellType(false);  // disable Empty type support
+		REQUIRE(parser.useEmptyCellType() == false);
 		REQUIRE_NOTHROW(parser.parseTo(","sv, cell_refs));
 		REQUIRE(cell_refs.size() == 2);
 		REQUIRE(cell_refs.at(0).size() == 1);
@@ -523,7 +524,9 @@ TEST_CASE("CsvParser", "[csv][parser]")
 
 
 	SECTION("supports constexpr") {
-		constexpr std::string_view data = "\"abc\",def\n\"with \"\"quote inside\",6"sv;
+		constexpr std::string_view data =
+R"(abc, "def"
+"with ""quote inside",6)";
 		constexpr Csv::Parser parser;
 
 		// parse into std::array<std::array<CellStringReference, rows>, columns>
@@ -531,12 +534,12 @@ TEST_CASE("CsvParser", "[csv][parser]")
 
 		static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
 		static_assert(matrix[1][0].getOriginalStringView() == "def"sv);
-		static_assert(matrix[0][1].getOriginalStringView() == "with \"\"quote inside"sv);
+		static_assert(matrix[0][1].getOriginalStringView() == R"(with ""quote inside)"sv);
 		static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 
-		constexpr auto buffer_size = "with \"\"quote inside"sv.size();
+		constexpr auto buffer_size = R"(with ""quote inside)"sv.size();
 		constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
-		static_assert(buffer.getStringView() == "with \"quote inside"sv);
+		static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
 		static_assert(buffer.isValid());
 		static_assert(buffer.getOptionalStringView().has_value());
 

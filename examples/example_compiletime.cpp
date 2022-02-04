@@ -29,8 +29,8 @@ R"(abc,5
 	static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
 	static_assert(matrix[1][0].getOriginalStringView() == "5"sv);
 	static_assert(matrix[0][1].getOriginalStringView().empty());
-	static_assert(matrix[1][1].getCleanStringBuffer<"with \"\"quote inside"sv.size()>().getStringView()
-			== "with \"quote inside"sv);
+	static_assert(matrix[1][1].getCleanStringBuffer<R"(with ""quote inside)"sv.size()>().getStringView()
+			== R"(with "quote inside)"sv);
 
 	return EXIT_SUCCESS;
 }
