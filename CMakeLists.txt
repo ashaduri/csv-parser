@@ -19,6 +19,7 @@ target_sources(csv_parser
 	INTERFACE
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_cell.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_error.h
+		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_matrix.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_parser.h
 )
 target_include_directories(csv_parser
@@ -54,6 +55,15 @@ add_executable(example_runtime
 	examples/example_runtime.cpp
 )
 target_link_libraries(example_runtime
+	PRIVATE
+		csv_parser
+		compiler_warnings
+)
+
+add_executable(example_runtime_numeric
+	examples/example_runtime_numeric.cpp
+)
+target_link_libraries(example_runtime_numeric
 	PRIVATE
 		csv_parser
 		compiler_warnings
