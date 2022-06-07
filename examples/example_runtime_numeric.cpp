@@ -45,7 +45,7 @@ int parseUsingCellDoubleValue(std::string_view csv_data)
 
 
 
-// Example of parsing using CellDoubleValue
+// Example of parsing to flat matrix
 int parseUsingMatrixRowMajor(std::string_view csv_data, std::size_t num_columns)
 {
 	// Let "cell_values" be a matrix in row-major format.
