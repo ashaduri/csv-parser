@@ -88,7 +88,7 @@ constexpr std::size_t columns = 2, rows = 2;
 constexpr Csv::Parser parser;
 
 // parse into std::array<std::array<CellStringReference, rows>, columns>
-constexpr auto matrix = parser.parseTo2DArray<columns, rows>(data);
+constexpr auto matrix = parser.parseTo2DArray<rows, columns>(data);
 
 // Verify the data at compile time.
 // Note that consecutive double-quotes are not collapsed when using

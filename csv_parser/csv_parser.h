@@ -84,8 +84,12 @@ class Parser {
 		constexpr void parseTo(std::string_view data, Vector2D& values) const;
 
 
-		/// Parse CSV string to std::array<std::array<CellStringReference>>, an array of columns.
+		/// Parse CSV string to 2D std::array, an array of columns.
 		/// This method conveniently wraps parseTo() to simplify compile-time parsing.
+		/// \param data CSV string data.
+		/// \tparam rows Number of rows
+		/// \tparam columns Number of columns
+		/// \tparam Cell Type of cell in array, e.g. CellStringReference
 		/// \return std::array<std::array<Cell, rows>, columns>
 		/// \throws ParseError
 		template<std::size_t columns, std::size_t rows, typename Cell = CellStringReference>
@@ -441,7 +445,7 @@ constexpr void Parser::parseTo(std::string_view data, Vector2D& values) const
 
 
 
-template<std::size_t columns, std::size_t rows, typename Cell>
+template<std::size_t rows, std::size_t columns, typename Cell>
 constexpr auto Parser::parseTo2DArray(std::string_view data) const
 {
 	std::array<std::array<Cell, rows>, columns> matrix;
