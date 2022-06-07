@@ -474,16 +474,16 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	}
 
 
-	SECTION("readDouble() performs as expected") {
+	SECTION("readNumber() performs as expected") {
 		// Most of these tests are done in parser test above.
-		REQUIRE_FALSE(Csv::readDouble(""sv).has_value());
-		REQUIRE_FALSE(Csv::readDouble("a5"sv).has_value());
-		REQUIRE_FALSE(Csv::readDouble("5a"sv).has_value());
-		REQUIRE_FALSE(Csv::readDouble("5 a"sv).has_value());
-		REQUIRE(Csv::readDouble("1"sv) == 1.);
-		REQUIRE(Csv::readDouble("-5e+6"sv) == -5e+6);
-		REQUIRE(Csv::readDouble("-Inf"sv) == -std::numeric_limits<double>::infinity());
-		REQUIRE(std::isnan(Csv::readDouble("nan"sv).value()));
+		REQUIRE_FALSE(Csv::readNumber<double>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumber<double>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumber<double>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumber<double>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumber<double>("1"sv) == 1.);
+		REQUIRE(Csv::readNumber<double>("-5e+6"sv) == -5e+6);
+		REQUIRE(Csv::readNumber<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
+		REQUIRE(std::isnan(Csv::readNumber<double>("nan"sv).value()));
 	}
 
 
