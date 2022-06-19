@@ -46,7 +46,7 @@ int parseUsingCellDoubleValue(std::string_view csv_data)
 
 
 // Example of parsing to flat matrix
-int parseUsingMatrixRowMajor(std::string_view csv_data, std::size_t num_columns)
+int parseUsingMatrixRowMajor(std::string_view csv_data)
 {
 	// Let "cell_values" be a matrix in row-major format.
 	std::vector<float> cell_values;
@@ -56,7 +56,7 @@ int parseUsingMatrixRowMajor(std::string_view csv_data, std::size_t num_columns)
 		Csv::Parser parser;
 
 		// parseTo() throws ParseError on error.
-		info = parser.parseToMatrixRowMajor(csv_data, cell_values, std::nullopt, num_columns);
+		info = parser.parseToMatrixRowMajor(csv_data, cell_values);
 	}
 	catch(Csv::ParseError& ex) {
 		std::cerr << "CSV parse error: " << ex.what() << std::endl;
@@ -65,7 +65,7 @@ int parseUsingMatrixRowMajor(std::string_view csv_data, std::size_t num_columns)
 
 	for (std::size_t column = 0; column < info.getColumns(); ++column) {
 		for (std::size_t row = 0; row < info.getRows(); ++row) {
-			float value = cell_values.at(info.matrixIndex(row, column));
+			auto value = cell_values.at(info.matrixIndex(row, column));
 			std::string formatted = std::to_string(value);
 			std::cout << "(row: " << (row+1) << ", col: " << (column+1) << "): " << formatted << std::endl;
 		}
@@ -78,14 +78,13 @@ int parseUsingMatrixRowMajor(std::string_view csv_data, std::size_t num_columns)
 
 int main(int argc, char** argv)
 {
-	if (argc <= 2) {
-		std::cout << "Usage: " << argv[0] << " <input.csv> <num_columns>" << std::endl;
+	if (argc <= 1) {
+		std::cout << "Usage: " << argv[0] << " <input.csv>" << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	// Load file from parameter
 	std::string input_file = (argv[1] ? argv[1] : "");
-	std::size_t num_columns = std::stoi(argv[2] ? argv[2] : "");
 
 	// Read the file to string (inefficient method, but valid for this example)
 	std::ifstream ifs(input_file, std::ios::binary);
@@ -98,7 +97,7 @@ int main(int argc, char** argv)
 
 	int cell_double_value_status = parseUsingCellDoubleValue(csv_data);
 
-	int matrix_row_major_status = parseUsingMatrixRowMajor(csv_data, num_columns);
+	int matrix_row_major_status = parseUsingMatrixRowMajor(csv_data);
 
 	return cell_double_value_status || matrix_row_major_status;
 }

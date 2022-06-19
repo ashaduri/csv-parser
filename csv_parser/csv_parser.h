@@ -100,15 +100,25 @@ class Parser {
 
 
 		/// Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ...).
+		/// The number of rows and columns is determined automatically.
+		/// \param data string data to parse.
+		/// \param[out] values a flat (empty) matrix. This will be resized automatically. Accepts types like std::vector<double>.
+		/// \return matrix information
+		/// \throws ParseError
+		template<typename Vector>
+		constexpr MatrixInformation parseToMatrixRowMajor(std::string_view data, Vector& values) const;
+
+
+		/// Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ...).
 		/// \param data string data to parse.
 		/// \param[out] values a flat (empty) matrix. This will be resized automatically. Accepts types like std::vector<double>.
 		/// \param rows_hint std::nullopt, or the number of rows which will help with optimizing allocations.
-		/// \param columns The number of columns, required. It is needed to calculate offsets in output container.
+		/// \param columns The number of columns. If std::nullopt, the number of columns is determined automatically.
 		/// \return matrix information
 		/// \throws ParseError
 		template<typename Vector>
 		constexpr MatrixInformation parseToMatrixRowMajor(std::string_view data, Vector& values,
-				std::optional<std::size_t> rows_hint, std::size_t columns) const;
+				std::optional<std::size_t> rows_hint, std::optional<std::size_t> columns) const;
 
 
 		/// Parse CSV string data into a flat matrix in column-major format (A11, A21, A31, A12, ...).
@@ -499,23 +509,52 @@ constexpr auto Parser::parseTo2DArray(std::string_view data) const
 
 
 template<typename Vector>
+constexpr MatrixInformation Parser::parseToMatrixRowMajor(std::string_view data, Vector& values) const
+{
+	return parseToMatrixRowMajor(data, values, std::nullopt, std::nullopt);
+}
+
+
+
+template<typename Vector>
 constexpr MatrixInformation Parser::parseToMatrixRowMajor(std::string_view data, Vector& values,
-		std::optional<std::size_t> rows_hint, std::size_t columns) const
+		std::optional<std::size_t> rows_hint, std::optional<std::size_t> columns) const
 {
 	Vector parsed_values;
-	if (rows_hint.has_value()) {
-		values.reserve(rows_hint.value() * columns);
+	if (rows_hint.has_value() && columns.has_value()) {
+		parsed_values.reserve(rows_hint.value() * columns.value());
 	}
 
 	MatrixInformation info;
 	info.setOrder(MatrixOrder::RowMajor);
-	info.setColumns(columns);
 
+	bool unknown_columns = !columns.has_value();
+	if (columns.has_value()) {
+		info.setColumns(columns.value());
+	}
+	std::size_t read_columns = 0;
+
+	// The lambda is called in row-major order, so we can exploit that to determine the number of columns.
 	parse(data,
 			[&](std::size_t row, std::size_t column, std::string_view cell_data, [[maybe_unused]] CellTypeHint hint)
 		{
-			if (parsed_values.size() < ((row + 1) * columns)) {
-				parsed_values.resize((row + 1) * columns);
+			if (unknown_columns) {
+				if (row == 0) {
+					read_columns = column + 1;
+					parsed_values.resize(read_columns);
+				} else if (row == 1) {
+					unknown_columns = false;
+					info.setColumns(read_columns);
+					if (rows_hint.has_value()) {
+						parsed_values.reserve(rows_hint.value() * info.getColumns());
+					}
+				}
+			}
+
+			if (!unknown_columns) {
+				if (parsed_values.size() < ((row + 1) * info.getColumns())) {
+					parsed_values.resize((row + 1) * info.getColumns());
+				}
 			}
 			using Number = typename Vector::value_type;
 			parsed_values[info.matrixIndex(row, column)] = readNumber<Number>(cell_data).value_or(std::numeric_limits<Number>::quiet_NaN());
@@ -535,7 +574,7 @@ constexpr MatrixInformation Parser::parseToMatrixColumnMajor(std::string_view da
 {
 	Vector parsed_values;
 	if (columns_hint.has_value()) {
-		values.reserve(columns_hint.value() * rows);
+		parsed_values.reserve(columns_hint.value() * rows);
 	}
 
 	MatrixInformation info;
