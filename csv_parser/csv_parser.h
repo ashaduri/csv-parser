@@ -588,7 +588,7 @@ constexpr MatrixInformation Parser::parseToMatrixColumnMajor(std::string_view da
 				parsed_values.resize((column + 1) * rows);
 			}
 			using Number = typename Vector::value_type;
-			parsed_values[info.matrixIndex(row, column)] = readNumber<Number>(cell_data).template value_or(std::numeric_limits<Number>::quiet_NaN());
+			parsed_values[info.matrixIndex(row, column)] = readNumber<Number>(cell_data).value_or(std::numeric_limits<Number>::quiet_NaN());
 		}
 	);
 	std::swap(values, parsed_values);
