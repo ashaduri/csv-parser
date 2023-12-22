@@ -40,8 +40,8 @@ std::vector<std::vector<Csv::CellReference>> cell_refs;
 Csv::Parser parser;
 
 try {
-    // parseTo() throws Csv::ParseError on error.
-    parser.parseTo(data, cell_refs);
+    // This throws Csv::ParseError on error.
+    parser.parseTo2DVector(data, cell_refs);
 }
 catch(Csv::ParseError& ex) {
     std::cerr << "CSV parse error: " << ex.what() << std::endl;
@@ -61,6 +61,45 @@ std::cout << "Column 0, row 0: " << cell_refs[0][0].getCleanString().value() << 
 std::cout << "Column 1, row 0: " << cell_refs[1][0].getCleanString().value() << std::endl;  // def
 std::cout << "Column 0, row 1: " << cell_refs[0][1].getDouble().value() << std::endl;  // 5
 std::cout << "Column 1, row 1: " << cell_refs[1][1].getDouble().value() << std::endl;  // 6
+```
+
+### Runtime Parsing of Numeric Matrix Into 1D Vector With Row-Major Order 
+
+#### Example:
+
+``` C++
+#include "csv_parser.h"
+
+// ...
+
+using namespace std::string_view_literals;
+
+
+// Data to parse
+std::string_view data = "3,5\n10e4,20"sv;
+
+// Let "cell_refs" be a vector double values.
+std::vector<std::vector<double>> matrix_data;
+
+Csv::Parser parser;
+
+try {
+    // This throws Csv::ParseError on error.
+    parser.parseTo2DVector(data, matrix_data);
+}
+catch(Csv::ParseError& ex) {
+    std::cerr << "CSV parse error: " << ex.what() << std::endl;
+    return EXIT_FAILURE;
+}
+
+assert(matrix_data.size() == 2);
+assert(matrix_data[0].size() == 2);
+assert(matrix_data[1].size() == 2);
+
+std::cout << "Column 0, row 0: " << cell_refs[0][0] << std::endl;  // 3
+std::cout << "Column 1, row 0: " << cell_refs[1][0] << std::endl;  // 5
+std::cout << "Column 0, row 1: " << cell_refs[0][1] << std::endl;  // 10e4
+std::cout << "Column 1, row 1: " << cell_refs[1][1] << std::endl;  // 20
 ```
 
 ### Compile-Time Parsing

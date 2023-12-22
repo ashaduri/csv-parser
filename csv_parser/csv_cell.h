@@ -271,6 +271,17 @@ class CellStringValue {
 
 
 
+/// Parser::parse*() functions use this to create the value_type object of a container.
+/// By default, it handles Cell* classes and primitive numeric types.
+/// This trait can be specialized for user-defined types.
+template<typename CellT>
+class CellTrait {
+	public:
+		/// Create an object of type CellT from cell contents represented as string_view.
+		[[nodiscard]] static constexpr CellT create(std::string_view cell, CellTypeHint hint);
+};
+
+
 
 /// Unescape a string - collapse every occurrence of 2 consecutive double-quotes to one.
 inline std::string cleanString(std::string_view view);
@@ -578,6 +589,30 @@ CellStringValue::CellStringValue(std::string_view cell, CellTypeHint hint)
 const std::string& CellStringValue::getString() const
 {
 	return value_;
+}
+
+
+
+
+
+template<typename CellT>
+constexpr CellT CellTrait<CellT>::create(std::string_view cell, CellTypeHint hint)
+{
+	// The types here are the same as in readNumber()
+	if constexpr(std::is_same_v<CellT, float>
+			|| std::is_same_v<CellT, double>
+			|| std::is_same_v<CellT, long double>) {
+		return readNumber<CellT>(cell).value_or(std::numeric_limits<CellT>::quiet_NaN());
+	} else if constexpr(std::is_same_v<CellT, int>
+			|| std::is_same_v<CellT, long int>
+			|| std::is_same_v<CellT, long long int>
+			|| std::is_same_v<CellT, unsigned long int>
+			|| std::is_same_v<CellT, unsigned long long int>) {
+		return readNumber<CellT>(cell).value_or(0);
+	} else {
+		// Cell* classes
+		return CellT(cell, hint);
+	}
 }
 
 

@@ -14,7 +14,7 @@ namespace Csv {
 
 
 
-/// Type hint associated with the cell to determine the type of the cell value
+/// Order of elements in a matrix.
 enum class MatrixOrder {
 	RowMajor,  ///< A11, A12, A13, A21, ...
 	ColumnMajor,  ///< A11, A21, A31, A12, ...
@@ -29,14 +29,30 @@ class MatrixInformation {
 		/// Get index in flat-matrix vector
 		/// \param row 0-based row number
 		/// \param column 0-based column number
+		/// \param rows Number of rows in matrix
+		/// \param columns Number of columns in matrix
+		/// \param order Matrix order
 		/// \return 0-based index in vector
-		constexpr std::size_t matrixIndex(std::size_t row, std::size_t column) const
+		[[nodiscard]] static constexpr std::size_t matrixIndex(std::size_t row, std::size_t column,
+				std::size_t rows, std::size_t columns, MatrixOrder order)
 		{
-			if (order_ == MatrixOrder::RowMajor) {
-				return row * columns_ + column;
+			if (order == MatrixOrder::RowMajor) {
+				return row * columns + column;
 			}
-			return column * rows_ + row;
+			return column * rows + row;
 		}
+
+
+
+		/// Get index in flat-matrix vector
+		/// \param row 0-based row number
+		/// \param column 0-based column number
+		/// \return 0-based index in vector
+		[[nodiscard]] constexpr std::size_t matrixIndex(std::size_t row, std::size_t column) const
+		{
+			return matrixIndex(row, column, rows_, columns_, order_);
+		}
+
 
 
 		[[nodiscard]] constexpr std::size_t getRows() const

@@ -29,8 +29,8 @@ int parsePredefinedData()
 	Csv::Parser parser;
 
 	try {
-		// parseTo() throws ParseError on error.
-		parser.parseTo(data, cell_refs);
+		// This throws ParseError on error.
+		parser.parseTo2DVector(data, cell_refs);
 	}
 	catch(Csv::ParseError& ex) {
 		std::cerr << "CSV parse error: " << ex.what() << std::endl;
@@ -83,8 +83,8 @@ int main(int argc, char** argv)
 	try {
 		Csv::Parser parser;
 
-		// parseTo() throws ParseError on error.
-		parser.parseTo(csv_data, cell_refs);
+		// This throws ParseError on error.
+		parser.parseTo2DVector(csv_data, cell_refs);
 	}
 	catch(Csv::ParseError& ex) {
 		std::cerr << "CSV parse error: " << ex.what() << std::endl;

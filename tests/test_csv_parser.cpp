@@ -26,7 +26,7 @@ Csv::CellReference parseSingleValue(std::string_view data)
 {
 	Csv::Parser parser;
 	std::vector<std::vector<Csv::CellReference>> cell_refs;
-	parser.parseTo(data, cell_refs);
+	parser.parseTo2DVector(data, cell_refs);
 	REQUIRE(cell_refs.size() == 1);
 	REQUIRE(cell_refs.at(0).size() == 1);
 	return cell_refs.at(0).at(0);
@@ -43,7 +43,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	SECTION("parsing empty text does nothing") {
 		std::vector<std::vector<Csv::CellReference>> cell_refs;
 		Csv::Parser parser;
-		REQUIRE_NOTHROW(parser.parseTo(""sv, cell_refs));
+		REQUIRE_NOTHROW(parser.parseTo2DVector(""sv, cell_refs));
 		REQUIRE(cell_refs.empty());
 	}
 
@@ -51,7 +51,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	SECTION("can parse empty values as Empty") {
 		std::vector<std::vector<Csv::CellReference>> cell_refs;
 		Csv::Parser parser;
-		REQUIRE_NOTHROW(parser.parseTo(","sv, cell_refs));
+		REQUIRE_NOTHROW(parser.parseTo2DVector(","sv, cell_refs));
 		REQUIRE(cell_refs.size() == 2);
 		REQUIRE(cell_refs.at(0).size() == 1);
 		REQUIRE(cell_refs.at(1).size() == 1);
@@ -65,7 +65,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		Csv::Parser parser;
 		parser.useEmptyCellType(false);  // disable Empty type support
 		REQUIRE(parser.useEmptyCellType() == false);
-		REQUIRE_NOTHROW(parser.parseTo(","sv, cell_refs));
+		REQUIRE_NOTHROW(parser.parseTo2DVector(","sv, cell_refs));
 		REQUIRE(cell_refs.size() == 2);
 		REQUIRE(cell_refs.at(0).size() == 1);
 		REQUIRE(cell_refs.at(1).size() == 1);
@@ -199,7 +199,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		Csv::Parser parser;
 
 		SECTION("parse a single line") {
-			REQUIRE_NOTHROW(parser.parseTo("a,b", cell_refs));
+			REQUIRE_NOTHROW(parser.parseTo2DVector("a,b", cell_refs));
 			REQUIRE(cell_refs.size() == 2);
 			REQUIRE(cell_refs.at(0).size() == 1);
 			REQUIRE(cell_refs.at(1).size() == 1);
@@ -208,7 +208,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		}
 
 		SECTION("parse a single complex line") {
-			REQUIRE_NOTHROW(parser.parseTo(
+			REQUIRE_NOTHROW(parser.parseTo2DVector(
 					"5,inf,,string,\"quoted string\",\"with\"\"quote\",\"multi\r\nline\",\"with,commas\","sv, cell_refs));
 
 			REQUIRE(cell_refs.size() == 9);
@@ -251,7 +251,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		}
 
 		SECTION("parse multiple lines") {
-			REQUIRE_NOTHROW(parser.parseTo("\"multi\r\nline\"\r\ntext\nwith many\rendings\n"sv, cell_refs));
+			REQUIRE_NOTHROW(parser.parseTo2DVector("\"multi\r\nline\"\r\ntext\nwith many\rendings\n"sv, cell_refs));
 
 			REQUIRE(cell_refs.size() == 1);
 			REQUIRE(cell_refs.at(0).size() == 4);
@@ -270,7 +270,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		}
 
 		SECTION("parse 2D data") {
-			REQUIRE_NOTHROW(parser.parseTo("abc,def\n5,6"sv, cell_refs));
+			REQUIRE_NOTHROW(parser.parseTo2DVector("abc,def\n5,6"sv, cell_refs));
 
 			REQUIRE(cell_refs.size() == 2);
 			REQUIRE(cell_refs[0].size() == 2);
@@ -292,7 +292,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	SECTION("CellReference supports different data") {
 		std::vector<std::vector<Csv::CellReference>> cell_refs;
 		Csv::Parser parser;
-		REQUIRE_NOTHROW(parser.parseTo("\"a\nb\",\"c\"\"d\"\n5e6,"sv, cell_refs));
+		REQUIRE_NOTHROW(parser.parseTo2DVector("\"a\nb\",\"c\"\"d\"\n5e6,"sv, cell_refs));
 
 		REQUIRE(cell_refs.size() == 2);
 		REQUIRE(cell_refs[0].size() == 2);
@@ -341,7 +341,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		{
 			Csv::Parser parser;
 			std::string data = "\"a\nb\",\"c\"\"d\"\n5e6,";
-			REQUIRE_NOTHROW(parser.parseTo(data, cell_values));
+			REQUIRE_NOTHROW(parser.parseTo2DVector(data, cell_values));
 		}
 
 		REQUIRE(cell_values.size() == 2);
@@ -383,7 +383,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		{
 			Csv::Parser parser;
 			std::string data = "\"1\",\"inf\"\n5e6,";
-			REQUIRE_NOTHROW(parser.parseTo(data, cell_values));
+			REQUIRE_NOTHROW(parser.parseTo2DVector(data, cell_values));
 		}
 
 		REQUIRE(cell_values.size() == 2);
@@ -400,7 +400,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	SECTION("CellStringReference supports different data") {
 		std::vector<std::vector<Csv::CellStringReference>> cell_refs;
 		Csv::Parser parser;
-		REQUIRE_NOTHROW(parser.parseTo("\"a\nb\",\"c\"\"d\"\n5e6,"sv, cell_refs));
+		REQUIRE_NOTHROW(parser.parseTo2DVector("\"a\nb\",\"c\"\"d\"\n5e6,"sv, cell_refs));
 
 		REQUIRE(cell_refs.size() == 2);
 		REQUIRE(cell_refs[0].size() == 2);
@@ -450,7 +450,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		{
 			Csv::Parser parser;
 			std::string data = "\"a\nb\",\"c\"\"d\"\n5e6,";
-			REQUIRE_NOTHROW(parser.parseTo(data, cell_values));
+			REQUIRE_NOTHROW(parser.parseTo2DVector(data, cell_values));
 		}
 
 		REQUIRE(cell_values.size() == 2);
@@ -492,28 +492,28 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		Csv::Parser parser;
 
 		SECTION("quote missing") {
-			REQUIRE_THROWS_AS(parser.parseTo("\"abc"sv, cell_refs), Csv::ParseError);
+			REQUIRE_THROWS_AS(parser.parseTo2DVector("\"abc"sv, cell_refs), Csv::ParseError);
 		}
 		SECTION("quote missing with newline") {
-			REQUIRE_THROWS_AS(parser.parseTo("\"abc\n"sv, cell_refs), Csv::ParseError);
+			REQUIRE_THROWS_AS(parser.parseTo2DVector("\"abc\n"sv, cell_refs), Csv::ParseError);
 		}
 		SECTION("quote missing with comma") {
-			REQUIRE_THROWS_AS(parser.parseTo("\"abc,\n"sv, cell_refs), Csv::ParseError);
+			REQUIRE_THROWS_AS(parser.parseTo2DVector("\"abc,\n"sv, cell_refs), Csv::ParseError);
 		}
 		SECTION("quote missing on new line") {
-			REQUIRE_THROWS_AS(parser.parseTo("abc,\n\"cde,"sv, cell_refs), Csv::ParseError);
+			REQUIRE_THROWS_AS(parser.parseTo2DVector("abc,\n\"cde,"sv, cell_refs), Csv::ParseError);
 		}
 		SECTION("quote not escaped (middle) (in unquoted cell)") {
 			// quote inside unquoted string (conflicts with "" inside unquoted string)
-			REQUIRE_THROWS_AS(parser.parseTo("a\"b"sv, cell_refs), Csv::ParseError);
+			REQUIRE_THROWS_AS(parser.parseTo2DVector("a\"b"sv, cell_refs), Csv::ParseError);
 		}
 		SECTION("escaped quote in the beginning (in unquoted cell)") {
 			// escaped quote starting unquoted string (a starting quote indicates quoted string, it's an error).
-			REQUIRE_THROWS_AS(parser.parseTo("\"\"a"sv, cell_refs), Csv::ParseError);
+			REQUIRE_THROWS_AS(parser.parseTo2DVector("\"\"a"sv, cell_refs), Csv::ParseError);
 		}
 		SECTION("exception object is correct") {
 			try {
-				parser.parseTo("ab,cd,ef\n5,6,\"7", cell_refs);
+				parser.parseTo2DVector("ab,cd,ef\n5,6,\"7", cell_refs);
 			}
 			catch (Csv::ParseError& ex) {
 				REQUIRE(ex.row() == 1);
