@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 Alexander Shaduri
+Copyright: (C) 2021 - 2023 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -9,6 +9,7 @@ License: Zlib
 #include "csv_cell.h"
 #include "csv_error.h"
 #include "csv_matrix.h"
+#include "csv_util.h"
 
 #include <string>
 #include <string_view>
@@ -144,13 +145,6 @@ class Parser {
 		/// \throws ParseError
 		template<std::size_t rows, std::size_t columns, typename Cell = CellStringReference>
 		constexpr auto parseToArray(std::string_view data, MatrixOrder order) const;
-
-
-		/// A helper function to get an element of parsed 2D vector without resorting to offset calculations.
-		/// \tparam Vector2D a vector of columns
-		/// \return Vector2D's innermost type
-		template<typename Vector2D>
-		static constexpr auto vector2DValue(const Vector2D& values, std::size_t row, std::size_t column);
 
 
 
@@ -643,14 +637,6 @@ constexpr auto Parser::parseToArray(std::string_view data, MatrixOrder order) co
 	);
 
 	return matrix;
-}
-
-
-
-template<typename Vector2D>
-constexpr auto Parser::vector2DValue(const Vector2D& values, std::size_t row, std::size_t column)
-{
-	return values.at(column).at(row);
 }
 
 

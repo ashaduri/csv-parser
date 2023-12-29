@@ -21,6 +21,7 @@ target_sources(csv_parser
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_error.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_matrix.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_parser.h
+		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_util.h
 )
 target_include_directories(csv_parser
 	INTERFACE
@@ -42,6 +43,9 @@ target_include_directories(catch2
 # Tests
 add_executable(test_csv_parser
 	tests/test_csv_parser.cpp
+	tests/test_csv_parser_matrix.cpp
+	tests/test_csv_cell.cpp
+	tests/test_csv_util.cpp
 )
 target_link_libraries(test_csv_parser
 	PRIVATE

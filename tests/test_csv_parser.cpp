@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 Alexander Shaduri
+Copyright: (C) 2021 - 2023 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -289,95 +289,8 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	}
 
 
-	SECTION("CellReference supports different data") {
-		std::vector<std::vector<Csv::CellReference>> cell_refs;
-		Csv::Parser parser;
-		REQUIRE_NOTHROW(parser.parseTo2DVector("\"a\nb\",\"c\"\"d\"\n5e6,"sv, cell_refs));
-
-		REQUIRE(cell_refs.size() == 2);
-		REQUIRE(cell_refs[0].size() == 2);
-		REQUIRE(cell_refs[1].size() == 2);
-
-		REQUIRE(cell_refs[0][0].getType() == Csv::CellType::String);
-		REQUIRE(cell_refs[1][0].getType() == Csv::CellType::String);
-		REQUIRE(cell_refs[0][1].getType() == Csv::CellType::Double);
-		REQUIRE(cell_refs[1][1].getType() == Csv::CellType::Empty);
-
-		{
-			bool has_escaped_quotes = false;
-			REQUIRE(cell_refs.at(0).at(0).getOriginalStringView(&has_escaped_quotes) == "a\nb"sv);
-			REQUIRE_FALSE(has_escaped_quotes);
-			REQUIRE(cell_refs.at(0).at(0).getCleanString() == "a\nb"s);
-			REQUIRE_FALSE(cell_refs.at(0).at(0).isEmpty());
-			REQUIRE_FALSE(cell_refs.at(0).at(0).getDouble().has_value());  // type mismatch
-		}
-		{
-			bool has_escaped_quotes = false;
-			REQUIRE(cell_refs.at(1).at(0).getOriginalStringView(&has_escaped_quotes) == "c\"\"d"sv);
-			REQUIRE(has_escaped_quotes);
-			REQUIRE(cell_refs.at(1).at(0).getCleanString() == "c\"d"s);
-			REQUIRE_FALSE(cell_refs.at(1).at(0).isEmpty());
-			REQUIRE_FALSE(cell_refs.at(1).at(0).getDouble().has_value());  // type mismatch
-		}
-		{
-			REQUIRE_FALSE(cell_refs.at(0).at(1).getOriginalStringView().has_value());  // type mismatch
-			REQUIRE_FALSE(cell_refs.at(0).at(1).getCleanString().has_value());  // type mismatch
-			REQUIRE_FALSE(cell_refs.at(0).at(1).isEmpty());
-			REQUIRE(cell_refs.at(0).at(1).getDouble() == 5e6);
-		}
-		{
-			REQUIRE_FALSE(cell_refs.at(1).at(1).getOriginalStringView().has_value());  // type mismatch
-			REQUIRE_FALSE(cell_refs.at(1).at(1).getCleanString().has_value());  // type mismatch
-			REQUIRE(cell_refs.at(1).at(1).isEmpty());
-			REQUIRE_FALSE(cell_refs.at(1).at(1).getDouble().has_value());  // type mismatch
-		}
-	}
-
-
-	SECTION("CellValue supports different data") {
-		std::vector<std::vector<Csv::CellValue>> cell_values;
-
-		// Limit the lifetime of original data and parser, checking that values can be stored properly.
-		{
-			Csv::Parser parser;
-			std::string data = "\"a\nb\",\"c\"\"d\"\n5e6,";
-			REQUIRE_NOTHROW(parser.parseTo2DVector(data, cell_values));
-		}
-
-		REQUIRE(cell_values.size() == 2);
-		REQUIRE(cell_values[0].size() == 2);
-		REQUIRE(cell_values[1].size() == 2);
-
-		REQUIRE(cell_values[0][0].getType() == Csv::CellType::String);
-		REQUIRE(cell_values[1][0].getType() == Csv::CellType::String);
-		REQUIRE(cell_values[0][1].getType() == Csv::CellType::Double);
-		REQUIRE(cell_values[1][1].getType() == Csv::CellType::Empty);
-
-		{
-			REQUIRE(cell_values.at(0).at(0).getString() == "a\nb"s);
-			REQUIRE_FALSE(cell_values.at(0).at(0).isEmpty());
-			REQUIRE_FALSE(cell_values.at(0).at(0).getDouble().has_value());  // type mismatch
-		}
-		{
-			REQUIRE(cell_values.at(1).at(0).getString() == "c\"d"s);
-			REQUIRE_FALSE(cell_values.at(1).at(0).isEmpty());
-			REQUIRE_FALSE(cell_values.at(1).at(0).getDouble().has_value());  // type mismatch
-		}
-		{
-			REQUIRE_FALSE(cell_values.at(0).at(1).getString().has_value());  // type mismatch
-			REQUIRE_FALSE(cell_values.at(0).at(1).isEmpty());
-			REQUIRE(cell_values.at(0).at(1).getDouble() == 5e6);
-		}
-		{
-			REQUIRE_FALSE(cell_values.at(1).at(1).getString().has_value());  // type mismatch
-			REQUIRE(cell_values.at(1).at(1).isEmpty());
-			REQUIRE_FALSE(cell_values.at(1).at(1).getDouble().has_value());  // type mismatch
-		}
-	}
-
-
-	SECTION("CellDoubleValue supports different data") {
-		std::vector<std::vector<Csv::CellDoubleValue>> cell_values;
+	SECTION("parse() supports floats") {
+		std::vector<std::vector<float>> cell_values;
 
 		// Limit the lifetime of original data and parser, checking that values can be stored properly.
 		{
@@ -390,66 +303,20 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		REQUIRE(cell_values[0].size() == 2);
 		REQUIRE(cell_values[1].size() == 2);
 
-		REQUIRE(cell_values.at(0).at(0).getValue() == 1);  // parses values inside quotes
-		REQUIRE(cell_values.at(1).at(0).getValue() == std::numeric_limits<double>::infinity());
-		REQUIRE(cell_values.at(0).at(1).getValue() == 5e6);
-		REQUIRE(std::isnan(cell_values.at(1).at(1).getValue()));
+		REQUIRE(cell_values.at(0).at(0) == 1);  // parses values inside quotes
+		REQUIRE(cell_values.at(1).at(0) == std::numeric_limits<float>::infinity());
+		REQUIRE(cell_values.at(0).at(1) == 5e6);
+		REQUIRE(std::isnan(cell_values.at(1).at(1)));
 	}
 
 
-	SECTION("CellStringReference supports different data") {
-		std::vector<std::vector<Csv::CellStringReference>> cell_refs;
-		Csv::Parser parser;
-		REQUIRE_NOTHROW(parser.parseTo2DVector("\"a\nb\",\"c\"\"d\"\n5e6,"sv, cell_refs));
-
-		REQUIRE(cell_refs.size() == 2);
-		REQUIRE(cell_refs[0].size() == 2);
-		REQUIRE(cell_refs[1].size() == 2);
-
-		{
-			bool has_escaped_quotes = false;
-			REQUIRE(cell_refs.at(0).at(0).getOriginalStringView(&has_escaped_quotes) == "a\nb"sv);
-			REQUIRE_FALSE(has_escaped_quotes);
-			REQUIRE(cell_refs.at(0).at(0).getCleanString() == "a\nb"s);
-		}
-		{
-			bool has_escaped_quotes = false;
-			REQUIRE(cell_refs.at(1).at(0).getOriginalStringView(&has_escaped_quotes) == "c\"\"d"sv);
-			REQUIRE(has_escaped_quotes);
-			REQUIRE(cell_refs.at(1).at(0).getCleanString() == "c\"d"s);
-
-			auto large_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<4>();
-			REQUIRE(large_buffer.isValid());
-			REQUIRE(large_buffer.getStringView() == "c\"d"sv);  // throwing
-			REQUIRE(large_buffer.getOptionalStringView() == "c\"d"sv);
-
-			auto small_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<3>();
-			REQUIRE_FALSE(small_buffer.isValid());
-			REQUIRE_THROWS_AS(small_buffer.getStringView(), std::out_of_range);
-			REQUIRE_FALSE(small_buffer.getOptionalStringView().has_value());
-		}
-		{
-			bool has_escaped_quotes = false;
-			REQUIRE(cell_refs.at(0).at(1).getOriginalStringView(&has_escaped_quotes) == "5e6"sv);
-			REQUIRE_FALSE(has_escaped_quotes);
-			REQUIRE(cell_refs.at(0).at(1).getCleanString() == "5e6"s);
-		}
-		{
-			bool has_escaped_quotes = false;
-			REQUIRE(cell_refs.at(1).at(1).getOriginalStringView(&has_escaped_quotes).empty());
-			REQUIRE(cell_refs.at(1).at(1).getCleanString().empty());
-			REQUIRE_FALSE(has_escaped_quotes);
-		}
-	}
-
-
-	SECTION("CellStringValue supports different data") {
-		std::vector<std::vector<Csv::CellStringValue>> cell_values;
+	SECTION("parse() supports doubles") {
+		std::vector<std::vector<double>> cell_values;
 
 		// Limit the lifetime of original data and parser, checking that values can be stored properly.
 		{
 			Csv::Parser parser;
-			std::string data = "\"a\nb\",\"c\"\"d\"\n5e6,";
+			std::string data = "\"1\",\"inf\"\n5e6,";
 			REQUIRE_NOTHROW(parser.parseTo2DVector(data, cell_values));
 		}
 
@@ -457,33 +324,31 @@ TEST_CASE("CsvParser", "[csv][parser]")
 		REQUIRE(cell_values[0].size() == 2);
 		REQUIRE(cell_values[1].size() == 2);
 
-		REQUIRE(cell_values.at(0).at(0).getString() == "a\nb"s);
-		REQUIRE(cell_values.at(1).at(0).getString() == "c\"d"s);
-		REQUIRE(cell_values.at(0).at(1).getString() == "5e6"s);
-		REQUIRE(cell_values.at(1).at(1).getString().empty());
+		REQUIRE(cell_values.at(0).at(0) == 1);  // parses values inside quotes
+		REQUIRE(cell_values.at(1).at(0) == std::numeric_limits<double>::infinity());
+		REQUIRE(cell_values.at(0).at(1) == 5e6);
+		REQUIRE(std::isnan(cell_values.at(1).at(1)));
 	}
 
 
-	SECTION("cleanString() performs as expected") {
-		// Most of these tests are done in parser test above.
-		REQUIRE(Csv::cleanString(""sv).empty());
-		REQUIRE(Csv::cleanString("\"\""sv) == "\""s);
-		REQUIRE(Csv::cleanString("a\"\"b"sv) == "a\"b"s);
-		REQUIRE(Csv::cleanString("a\"\""sv) == "a\""s);
-		REQUIRE(Csv::cleanString("\"\"\"\""sv) == "\"\""s);
-	}
+	SECTION("parse() supports ints") {
+		std::vector<std::vector<int>> cell_values;
 
+		// Limit the lifetime of original data and parser, checking that values can be stored properly.
+		{
+			Csv::Parser parser;
+			std::string data = "\"1\",\"inf\"\n5e6,";
+			REQUIRE_NOTHROW(parser.parseTo2DVector(data, cell_values));
+		}
 
-	SECTION("readNumber() performs as expected") {
-		// Most of these tests are done in parser test above.
-		REQUIRE_FALSE(Csv::readNumber<double>(""sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<double>("a5"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<double>("5a"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<double>("5 a"sv).has_value());
-		REQUIRE(Csv::readNumber<double>("1"sv) == 1.);
-		REQUIRE(Csv::readNumber<double>("-5e+6"sv) == -5e+6);
-		REQUIRE(Csv::readNumber<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
-		REQUIRE(std::isnan(Csv::readNumber<double>("nan"sv).value()));
+		REQUIRE(cell_values.size() == 2);
+		REQUIRE(cell_values[0].size() == 2);
+		REQUIRE(cell_values[1].size() == 2);
+
+		REQUIRE(cell_values.at(0).at(0) == 1);  // parses values inside quotes
+		REQUIRE(cell_values.at(1).at(0) == 0);
+		REQUIRE(cell_values.at(0).at(1) == 0);
+		REQUIRE(cell_values.at(1).at(1) == 0);
 	}
 
 
@@ -549,48 +414,6 @@ R"(abc, "def"
 		// static_assert(small_buffer.getStringView() != "with \"quote inside"sv);
 		// static_assert(!small_buffer.isValid());
 		// static_assert(!small_buffer.getOptionalStringView().has_value());
-	}
-
-
-	SECTION("supports constexpr with 1D array (column-major)") {
-		constexpr std::string_view data =
-R"(abc, "def"
-,"5"
-"R31",6)";
-		constexpr Csv::Parser parser;
-
-		// parse into std::array<std::array<CellStringReference, rows>, columns>
-		constexpr auto matrix = parser.parseToArray<3, 2>(data, Csv::MatrixOrder::ColumnMajor);
-
-		static_assert(matrix[0].getOriginalStringView() == "abc"sv);
-		static_assert(matrix[1].getOriginalStringView() == ""sv);
-		static_assert(matrix[2].getOriginalStringView() == "R31"sv);
-		static_assert(matrix[3].getOriginalStringView() == "def"sv);
-		static_assert(matrix[4].getOriginalStringView() == "5"sv);
-		static_assert(matrix[5].getOriginalStringView() == "6"sv);
-
-		static_assert(matrix.size() == 6);
-	}
-
-
-	SECTION("supports constexpr with 1D array (row-major)") {
-		constexpr std::string_view data =
-R"(abc, "def"
-,"5"
-"R31",6)";
-		constexpr Csv::Parser parser;
-
-		// parse into std::array<std::array<CellStringReference, rows>, columns>
-		constexpr auto matrix = parser.parseToArray<3, 2>(data, Csv::MatrixOrder::RowMajor);
-
-		static_assert(matrix[0].getOriginalStringView() == "abc"sv);
-		static_assert(matrix[1].getOriginalStringView() == "def"sv);
-		static_assert(matrix[2].getOriginalStringView() == ""sv);
-		static_assert(matrix[3].getOriginalStringView() == "5"sv);
-		static_assert(matrix[4].getOriginalStringView() == "R31"sv);
-		static_assert(matrix[5].getOriginalStringView() == "6"sv);
-
-		static_assert(matrix.size() == 6);
 	}
 
 }
