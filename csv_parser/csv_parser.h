@@ -576,7 +576,13 @@ constexpr MatrixInformation Parser::parseToVectorRowMajor(std::string_view data,
 	);
 	std::swap(values, parsed_values);
 
-	info.setRows(values.size() / info.getColumns());
+	if (values.empty()) {
+		MatrixInformation empty_info;
+		empty_info.setOrder(MatrixOrder::RowMajor);
+		return empty_info;
+	}
+
+	info.setRows(info.getColumns() == 0 ? 0 : (values.size() / info.getColumns()));
 
 	return info;
 }
@@ -608,7 +614,13 @@ constexpr MatrixInformation Parser::parseToVectorColumnMajor(std::string_view da
 	);
 	std::swap(values, parsed_values);
 
-	info.setColumns(values.size() / info.getRows());
+	if (values.empty()) {
+		MatrixInformation empty_info;
+		empty_info.setOrder(MatrixOrder::ColumnMajor);
+		return empty_info;
+	}
+
+	info.setColumns(info.getRows() == 0 ? 0 : (values.size() / info.getRows()));
 
 	return info;
 }
