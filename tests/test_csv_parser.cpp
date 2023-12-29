@@ -523,7 +523,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 	}
 
 
-	SECTION("supports constexpr") {
+	SECTION("supports constexpr with 2D array") {
 		constexpr std::string_view data =
 R"(abc, "def"
 "with ""quote inside",6)";
@@ -550,6 +550,49 @@ R"(abc, "def"
 		// static_assert(!small_buffer.isValid());
 		// static_assert(!small_buffer.getOptionalStringView().has_value());
 	}
+
+
+	SECTION("supports constexpr with 1D array (column-major)") {
+		constexpr std::string_view data =
+R"(abc, "def"
+,"5"
+"R31",6)";
+		constexpr Csv::Parser parser;
+
+		// parse into std::array<std::array<CellStringReference, rows>, columns>
+		constexpr auto matrix = parser.parseToArray<3, 2>(data, Csv::MatrixOrder::ColumnMajor);
+
+		static_assert(matrix[0].getOriginalStringView() == "abc"sv);
+		static_assert(matrix[1].getOriginalStringView() == ""sv);
+		static_assert(matrix[2].getOriginalStringView() == "R31"sv);
+		static_assert(matrix[3].getOriginalStringView() == "def"sv);
+		static_assert(matrix[4].getOriginalStringView() == "5"sv);
+		static_assert(matrix[5].getOriginalStringView() == "6"sv);
+
+		static_assert(matrix.size() == 6);
+	}
+
+
+	SECTION("supports constexpr with 1D array (row-major)") {
+		constexpr std::string_view data =
+R"(abc, "def"
+,"5"
+"R31",6)";
+		constexpr Csv::Parser parser;
+
+		// parse into std::array<std::array<CellStringReference, rows>, columns>
+		constexpr auto matrix = parser.parseToArray<3, 2>(data, Csv::MatrixOrder::RowMajor);
+
+		static_assert(matrix[0].getOriginalStringView() == "abc"sv);
+		static_assert(matrix[1].getOriginalStringView() == "def"sv);
+		static_assert(matrix[2].getOriginalStringView() == ""sv);
+		static_assert(matrix[3].getOriginalStringView() == "5"sv);
+		static_assert(matrix[4].getOriginalStringView() == "R31"sv);
+		static_assert(matrix[5].getOriginalStringView() == "6"sv);
+
+		static_assert(matrix.size() == 6);
+	}
+
 }
 
 

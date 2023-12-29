@@ -9,7 +9,6 @@ License: 0BSD (Zero-Clause BSD)
 #include <vector>
 #include <iostream>
 #include <cstdlib>
-#include <cassert>
 #include <fstream>
 
 
