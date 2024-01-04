@@ -148,7 +148,7 @@ static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 // buffer to place the clean string inside. The buffer size has to be at least that
 // of an uncollapsed string value.
 // If the buffer is too small, the code will simply not compile.
-constexpr auto buffer_size = R"(with ""quote inside)"sv.size();  // uncollapsed size
+constexpr auto buffer_size = matrix[0][1].getRequiredBufferSize();  // uncollapsed size
 constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
 static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
 ```

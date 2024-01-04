@@ -238,10 +238,11 @@ class CellStringReference {
 		/// Reserving additional character for terminating null is not required.
 		/// \return invalid buffer if BufferSize is too small.
 		template<std::size_t BufferSize>
-		[[nodiscard]] constexpr CellStringBuffer<BufferSize> getCleanStringBuffer() const
-		{
-			return CellStringBuffer<BufferSize>(value_, has_escaped_quotes_);
-		}
+		[[nodiscard]] constexpr CellStringBuffer<BufferSize> getCleanStringBuffer() const;
+
+		/// Get required buffer size to use as getCleanStringBuffer()'s template argument.
+		/// This function is useful in constexpr context.
+		[[nodiscard]] constexpr std::size_t getRequiredBufferSize() const;
 
 
 	private:
@@ -578,6 +579,21 @@ constexpr std::string_view CellStringReference::getOriginalStringView(bool* has_
 std::string CellStringReference::getCleanString()
 {
 	return has_escaped_quotes_ ? cleanString(value_) : std::string(value_);
+}
+
+
+
+template<std::size_t BufferSize>
+constexpr CellStringBuffer<BufferSize> CellStringReference::getCleanStringBuffer() const
+{
+	return CellStringBuffer<BufferSize>(value_, has_escaped_quotes_);
+}
+
+
+
+constexpr std::size_t CellStringReference::getRequiredBufferSize() const
+{
+	return value_.size();
 }
 
 

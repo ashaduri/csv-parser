@@ -35,6 +35,14 @@ NaN, -Inf
 	static_assert(matrix[0][2].getOriginalStringView() == "NaN"sv);
 	static_assert(matrix[1][2].getOriginalStringView() == " -Inf"sv);
 
+	// To support consecutive double-quote collapsing at compile-time, allocate a compile-time
+	// buffer to place the clean string inside. The buffer size has to be at least that
+	// of an uncollapsed string value.
+	// If the buffer is too small, the code will simply not compile.
+	constexpr auto buffer_size = matrix[1][1].getRequiredBufferSize();  // uncollapsed size
+	constexpr auto buffer = matrix[1][1].getCleanStringBuffer<buffer_size>();
+	static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
+
 	return EXIT_SUCCESS;
 }
 

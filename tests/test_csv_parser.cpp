@@ -402,11 +402,24 @@ R"(abc, "def"
 		static_assert(matrix[0][1].getOriginalStringView() == R"(with ""quote inside)"sv);
 		static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 
-		constexpr auto buffer_size = R"(with ""quote inside)"sv.size();
-		constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
-		static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
-		static_assert(buffer.isValid());
-		static_assert(buffer.getOptionalStringView().has_value());
+		{
+			// constexpr auto buffer_size = R"(with ""quote inside)"sv.size();
+			constexpr auto buffer_size = matrix[0][1].getRequiredBufferSize();
+			static_assert(buffer_size == 19);
+
+			constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
+			static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
+			static_assert(buffer.isValid());
+			static_assert(buffer.getOptionalStringView().has_value());
+		}
+
+		{
+			constexpr auto buffer_size = 1024;  // large buffer size
+			constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
+			static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
+			static_assert(buffer.isValid());
+			static_assert(buffer.getOptionalStringView().has_value());
+		}
 
 		// These will fail to compile due to small buffer size
 		// constexpr auto small_buffer_size = "with \"\"quote inside"sv.size() - 1;
