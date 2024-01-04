@@ -82,6 +82,17 @@ target_link_libraries(example_compiletime
 		compiler_warnings
 )
 
+# This example is disabled from build - it's only used as a syntax check for README.md contents
+add_executable(readme_examples
+	examples/readme_examples.cpp
+)
+target_link_libraries(readme_examples
+	PRIVATE
+		csv_parser
+		compiler_warnings
+)
+#set_target_properties(readme_examples PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+
 
 include(CTest)
 include(catch2/Catch.cmake)

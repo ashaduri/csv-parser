@@ -28,13 +28,13 @@
 
 using namespace std::string_view_literals;
 
-
 // Data to parse
 std::string_view data = "abc,def\n5,6"sv;
 
 // Let "cell_refs" be a vector of columns.
-// After parsing, each element will contain a std::string_view referencing
-// a part of the original data.
+// After parsing, each element will contain Csv::CellReference object. If the cell data type
+// is Csv::CellType::String, Csv::CellReference object will reference a part of the original data.
+// Other Cell* types, as well as floating point and integral types can also be used here.
 std::vector<std::vector<Csv::CellReference>> cell_refs;
 
 Csv::Parser parser;
@@ -74,32 +74,39 @@ std::cout << "Column 1, row 1: " << cell_refs[1][1].getDouble().value() << std::
 
 using namespace std::string_view_literals;
 
-
 // Data to parse
-std::string_view data = "3,5\n10e4,20"sv;
+std::string_view data = "11,12,13\n21,22,23"sv;
 
-// Let "cell_refs" be a vector double values.
-std::vector<std::vector<double>> matrix_data;
+// Let matrix_data be a flat matrix of doubles in row-major order.
+// Other floating point and integral types, as well as Cell* types can also be used here.
+std::vector<double> matrix_data;
 
 Csv::Parser parser;
+Csv::MatrixInformation info;
 
 try {
     // This throws Csv::ParseError on error.
-    parser.parseTo2DVector(data, matrix_data);
+    info = parser.parseToVectorRowMajor(data, matrix_data);
 }
 catch(Csv::ParseError& ex) {
     std::cerr << "CSV parse error: " << ex.what() << std::endl;
     return EXIT_FAILURE;
 }
 
-assert(matrix_data.size() == 2);
-assert(matrix_data[0].size() == 2);
-assert(matrix_data[1].size() == 2);
+assert(matrix_data.size() == 3 * 2);
+assert(info.getColumns() == 3);
+assert(info.getRows() == 2);
 
-std::cout << "Column 0, row 0: " << cell_refs[0][0] << std::endl;  // 3
-std::cout << "Column 1, row 0: " << cell_refs[1][0] << std::endl;  // 5
-std::cout << "Column 0, row 1: " << cell_refs[0][1] << std::endl;  // 10e4
-std::cout << "Column 1, row 1: " << cell_refs[1][1] << std::endl;  // 20
+std::cout << "Row 0, column 0: " << matrix_data[0] << std::endl;  // 11
+std::cout << "Row 0, column 1: " << matrix_data[1] << std::endl;  // 12
+std::cout << "Row 0, column 2: " << matrix_data[2] << std::endl;  // 13
+
+// matrixIndex(row, column) can be used to avoid accidental mistakes
+std::cout << "Row 1, column 0: " << matrix_data[info.matrixIndex(1, 0)] << std::endl;  // 21
+std::cout << "Row 1, column 1: " << matrix_data[info.matrixIndex(1, 1)] << std::endl;  // 22
+std::cout << "Row 1, column 2: " << matrix_data[info.matrixIndex(1, 2)] << std::endl;  // 23
+
+return EXIT_SUCCESS;
 ```
 
 ### Compile-Time Parsing

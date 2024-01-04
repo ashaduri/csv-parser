@@ -39,7 +39,7 @@ enum class CellType {
 
 
 
-/// A helper class for compile-time buffer construction and string unescaping
+/// A helper class for compile-time buffer construction and string unescaping.
 template<std::size_t Size>
 class CellStringBuffer {
 	public:
@@ -60,6 +60,9 @@ class CellStringBuffer {
 		/// \return std::nullopt if buffer is invalid (of insufficient size)
 		[[nodiscard]] constexpr std::optional<std::string_view> getOptionalStringView() const noexcept;
 
+		/// Return buffer size.
+		[[nodiscard]] constexpr std::size_t getBufferSize() const noexcept;
+
 
 	private:
 
@@ -70,17 +73,18 @@ class CellStringBuffer {
 		};
 
 		/// Create a buffer object, with cleaned-up input in it
-		constexpr static Buffer prepareBuffer(std::string_view input, bool has_escaped_quotes);
+		[[nodiscard]] constexpr static Buffer prepareBuffer(std::string_view input, bool has_escaped_quotes);
 
 		/// Unescape a string view to newly created buffer
-		constexpr static Buffer cleanString(std::string_view input);
+		[[nodiscard]] constexpr static Buffer cleanString(std::string_view input);
 
 		Buffer buffer_;
 };
 
 
 
-/// A value of a cell, referencing the data in original CSV text (if the data is of string type).
+/// A value of a cell.
+/// If the cell type is CellType::String, this object references the data in original CSV text.
 class CellReference {
 	public:
 
@@ -93,14 +97,16 @@ class CellReference {
 		/// Get cell type
 		[[nodiscard]] inline CellType getType() const;
 
-		/// Check whether the cell is of Empty type
+		/// Check whether the cell is of CellType::Empty type.
 		[[nodiscard]] inline bool isEmpty() const;
 
-		/// Get the cell value if cell type is Double.
+		/// Get the cell value as a double.
+		/// This succeeds only if cell type is CellType::Double.
 		/// \return std::nullopt on type mismatch
 		[[nodiscard]] inline std::optional<double> getDouble() const;
 
 		/// Get stored cell reference as string_view.
+		/// This succeeds only if cell type is CellType::String.
 		/// This cell may contain escaped consecutive double-quotes inside; if has_escaped_quotes is not nullptr,
 		/// *has_escaped_quotes will reflect that.
 		/// \return std::nullopt on type mismatch
@@ -108,6 +114,7 @@ class CellReference {
 				bool* has_escaped_quotes = nullptr) const;
 
 		/// Get stored cell reference as string.
+		/// This succeeds only if cell type is CellType::String.
 		/// The string has collapsed consecutive double-quotes inside.
 		/// \return std::nullopt on type mismatch
 		[[nodiscard]] inline std::optional<std::string> getCleanString() const;
@@ -133,7 +140,8 @@ class CellReference {
 
 
 
-/// A value of a cell. The object owns its data and does not reference the original CSV text.
+/// A value of a cell.
+/// This object always owns its data and does not reference the original CSV text.
 class CellValue {
 	public:
 
@@ -146,14 +154,16 @@ class CellValue {
 		/// Get cell type
 		[[nodiscard]] inline CellType getType() const;
 
-		/// Check whether the cell is of Empty type
+		/// Check whether the cell is of CellType::Empty type.
 		[[nodiscard]] inline bool isEmpty() const;
 
 		/// Get the cell value if cell type is Double.
+		/// This succeeds only if cell type is CellType::Double.
 		/// \return std::nullopt on type mismatch
 		[[nodiscard]] inline std::optional<double> getDouble() const;
 
 		/// Get stored cell reference as string.
+		/// This succeeds only if cell type is CellType::String.
 		/// The string has collapsed consecutive double-quotes inside.
 		/// \return std::nullopt on type mismatch
 		[[nodiscard]] inline std::optional<std::string> getString() const;
@@ -173,7 +183,9 @@ class CellValue {
 
 
 
-/// A value of a cell. All cell contents are treated as doubles. The data is owned by this object.
+/// A value of a cell. All cell contents are treated as having CellType::Double type.
+/// If conversion failure occurs, NaN is assumed.
+/// The data is always owned by this object.
 class CellDoubleValue {
 	public:
 
@@ -197,7 +209,7 @@ class CellDoubleValue {
 
 
 /// A value of a cell, referencing the data in original CSV text.
-/// All cell contents are treated as strings.
+/// All cell contents are treated as having CellType::String type.
 class CellStringReference {
 	public:
 
@@ -208,14 +220,14 @@ class CellStringReference {
 		inline constexpr CellStringReference(std::string_view cell, CellTypeHint hint) noexcept;
 
 		/// Get stored cell reference as string_view.
-		/// Cell type is assumed to be String, regardless of autodetected type.
+		/// Cell type is assumed to be CellType::String, regardless of auto-detected type.
 		/// This cell may contain escaped consecutive double-quotes inside; if has_escaped_quotes is not nullptr,
 		/// *has_escaped_quotes will reflect that.
 		[[nodiscard]] inline constexpr std::string_view getOriginalStringView(
 				bool* has_escaped_quotes = nullptr) const noexcept;
 
 		/// Get stored cell reference as string.
-		/// Cell type is assumed to be String, regardless of autodetected type.
+		/// Cell type is assumed to be CellType::String, regardless of auto-detected type.
 		/// The string has collapsed consecutive double-quotes inside.
 		[[nodiscard]] inline std::string getCleanString();
 
@@ -292,7 +304,7 @@ constexpr CellStringBuffer<Size>::CellStringBuffer(std::string_view cell, bool h
 
 
 template<std::size_t Size>
-[[nodiscard]] constexpr bool CellStringBuffer<Size>::isValid() const noexcept
+constexpr bool CellStringBuffer<Size>::isValid() const noexcept
 {
 	return buffer_.valid;
 }
@@ -300,7 +312,7 @@ template<std::size_t Size>
 
 
 template<std::size_t Size>
-[[nodiscard]] constexpr std::string_view CellStringBuffer<Size>::getStringView() const
+constexpr std::string_view CellStringBuffer<Size>::getStringView() const
 {
 	if (!buffer_.valid) {
 		throw std::out_of_range("Insufficient buffer size");
@@ -311,12 +323,20 @@ template<std::size_t Size>
 
 
 template<std::size_t Size>
-[[nodiscard]] constexpr std::optional<std::string_view> CellStringBuffer<Size>::getOptionalStringView() const noexcept
+constexpr std::optional<std::string_view> CellStringBuffer<Size>::getOptionalStringView() const noexcept
 {
 	if (!buffer_.valid) {
 		return std::nullopt;
 	}
 	return std::string_view{buffer_.buffer.data(), buffer_.size};
+}
+
+
+
+template<std::size_t Size>
+constexpr std::size_t CellStringBuffer<Size>::getBufferSize() const noexcept
+{
+	return Size;
 }
 
 
