@@ -12,29 +12,48 @@ License: Zlib
 #include <algorithm>
 
 
+/**
+ * \file
+ * Utility functions used by the library.
+ */
+
 
 namespace Csv {
 
 
-/// Helper for static_assert
-template<typename T>
-struct always_false : std::false_type {};
+namespace internal {
+
+	/// Helper for static_assert
+	/// \private
+	template<typename T>
+	struct always_false : std::false_type {};
+
+}
+
 
 
 /// Unescape a string - collapse every occurrence of 2 consecutive double-quotes to one.
+/// \param view Input string
+/// \return Unescaped string
 inline std::string cleanString(std::string_view view);
 
 
 /// Try to read a numeric value from string data.
-/// Unless the string data (with optional whitespace on either or both sides) completely represents a serialized
-/// int/float/double/..., std::nullopt is returned.
+/// Unless the string data completely represents a serialized int/float/double/..., `std::nullopt` is returned.
+/// \note This function is locale-dependent.
+/// \tparam Number Type of number to read, e.g. int, float, double, etc.
+/// \param cell String data to parse, with optional whitespace on one or both sides.
+/// \return Parsed number or `std::nullopt` if parsing failed.
 template<typename Number>
 std::optional<Number> readNumber(std::string_view cell);
 
 
-/// A helper function to get an element of parsed 2D vector in less error-prone way.
-/// \tparam Vector2D a vector of columns
-/// \return Vector2D's innermost type
+/// A helper function to get an element of a 2D vector in less error-prone way.
+/// \tparam Vector2D A 2D vector type, deduced from the argument.
+/// \param values A vector of columns
+/// \param row 0-based row number
+/// \param column 0-based column number
+/// \return Value of Vector2D's innermost type
 template<typename Vector2D>
 static constexpr auto vector2DValue(const Vector2D& values, std::size_t row, std::size_t column);
 
@@ -106,7 +125,7 @@ std::optional<Number> readNumber(std::string_view cell)
 			parsed_value = std::stoull(s, &num_processed);
 
 		} else {
-			static_assert(always_false<Number>::value, "Invalid Number type in Csv::readNumber()");
+			static_assert(internal::always_false<Number>::value, "Invalid Number type in Csv::readNumber()");
 		}
 
 		if (num_processed == s.size()) {

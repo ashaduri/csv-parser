@@ -16,12 +16,18 @@ License: Zlib
 #include <array>
 
 
+/**
+ * \file
+ * Main include file for the library.
+*/
+
+
 
 namespace Csv {
 
 
 
-/*
+/**
  * The main CSV parser class.
  *
  * CSV format is defined by RFC 4180:
@@ -72,9 +78,12 @@ class Parser {
 
 
 		/// Parse CSV string data and store the results using a callback function.
-		/// The calling order is to always pass the first row, then the second row, etc...
-		/// Callback function signature:
-		/// void func(std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint).
+		/// The calling order is to always pass the first row, then the second row, etc.
+		/// \tparam StoreCellFunction Callback function with the following signature:
+		/// 	`void func(std::size_t row, std::size_t column, std::string_view cell_data, CellTypeHint hint)`.
+		///		Deduced automatically.
+		/// \param data Full CSV string data.
+		/// \param storeCellFunc Callback function to store each parsed cell data.
 		/// \throws ParseError
 		template<typename StoreCellFunction>
 		constexpr void parse(std::string_view data, StoreCellFunction storeCellFunc) const;
@@ -82,20 +91,21 @@ class Parser {
 
 		/// Parse CSV string data into a vector of columns. The innermost type may be one of Cell* classes
 		// (e.g., CellReference), or a primitive numeric type (e.g., double).
-		/// \param data CSV string data.
-		/// \param[out] values An empty 2D vector to store the data in. Accepts types like std::vector<std::vector<CellReference>>.
+		/// \tparam Vector2D A 2D vector type, e.g. `std::vector<std::vector<CellReference>>`, deduced automatically.
+		/// \param data Full CSV string data.
+		/// \param[out] values An empty 2D vector to store the data in.
 		/// \throws ParseError
 		template<typename Vector2D>
 		constexpr void parseTo2DVector(std::string_view data, Vector2D& values) const;
 
 
 		/// Parse CSV string to 2D std::array, an array of columns.
-		/// This method conveniently wraps parse() function to simplify compile-time parsing.
-		/// \param data CSV string data.
+		/// This method conveniently wraps the parse() function to simplify compile-time parsing.
 		/// \tparam rows Number of rows
 		/// \tparam columns Number of columns
-		/// \tparam Cell Type of cell in array, e.g. CellStringReference
-		/// \return std::array<std::array<Cell, rows>, columns>
+		/// \tparam Cell Type of cell in array, e.g. CellStringReference. Must be constexpr-compatible.
+		/// \param data Full CSV string data.
+		/// \return `std::array<std::array<Cell, rows>, columns>`
 		/// \throws ParseError
 		template<std::size_t rows, std::size_t columns, typename Cell = CellStringReference>
 		constexpr auto parseTo2DArray(std::string_view data) const;
@@ -103,20 +113,22 @@ class Parser {
 
 		/// Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ...).
 		/// The number of rows and columns is determined automatically.
-		/// \param data string data to parse.
-		/// \param[out] values a flat (empty) matrix. This will be resized automatically. Accepts types like std::vector<double>.
-		/// \return matrix information
+		/// \tparam Vector A flat vector type, e.g. `std::vector<double>`, deduced automatically.
+		/// \param data Full CSV string data.
+		/// \param[out] values A flat (empty) matrix. This will be resized automatically.
+		/// \return Matrix information
 		/// \throws ParseError
 		template<typename Vector>
 		constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector& values) const;
 
 
 		/// Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ...).
-		/// \param data string data to parse.
-		/// \param[out] values a flat (empty) matrix. This will be resized automatically. Accepts types like std::vector<double>.
-		/// \param rows_hint std::nullopt, or the number of rows which will help with optimizing allocations.
-		/// \param columns The number of columns. If std::nullopt, the number of columns is determined automatically.
-		/// \return matrix information
+		/// \tparam Vector A flat vector type, e.g. `std::vector<double>`, deduced automatically.
+		/// \param data Full CSV string data.
+		/// \param[out] values A flat (empty) matrix. This will be resized automatically.
+		/// \param rows_hint `std::nullopt`, or the number of rows which will help with optimizing allocations.
+		/// \param columns The number of columns. If `std::nullopt`, the number of columns is determined automatically.
+		/// \return Matrix information
 		/// \throws ParseError
 		template<typename Vector>
 		constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector& values,
@@ -124,24 +136,26 @@ class Parser {
 
 
 		/// Parse CSV string data into a flat matrix in column-major format (A11, A21, A31, A12, ...).
-		/// \param data string data to parse.
-		/// \param[out] values a flat (empty) matrix. This will be resized automatically. Accepts types like std::vector<double>.
+		/// \param data Full CSV string data.
+		/// \tparam Vector A flat vector type, e.g. `std::vector<double>`, deduced automatically.
+		/// \param[out] values A flat (empty) matrix. This will be resized automatically.
 		/// \param rows The number of rows, required. It is needed to calculate offsets in output container.
-		/// \param columns_hint std::nullopt, or the number of columns which will help with optimizing allocations.
-		/// \return matrix information
+		/// \param columns_hint `std::nullopt`, or the number of columns which will help with optimizing allocations.
+		/// \return Matrix information
 		/// \throws ParseError
 		template<typename Vector>
 		constexpr MatrixInformation parseToVectorColumnMajor(std::string_view data, Vector& values,
 				std::size_t rows, std::optional<std::size_t> columns_hint) const;
 
 
-		/// Parse CSV string to 1D std::array, stored in row-major or column-major order.
+		/// Parse CSV string to 1D `std::array`, stored in row-major or column-major order.
 		/// This method conveniently wraps parse() function to simplify compile-time parsing.
-		/// \param data CSV string data.
 		/// \tparam rows Number of rows
 		/// \tparam columns Number of columns
-		/// \tparam Cell Type of cell in array, e.g. CellStringReference
-		/// \return std::array<Cell, rows*columns>
+		/// \tparam Cell Type of cell in array, e.g. CellStringReference. Must be constexpr-compatible.
+		/// \param data Full CSV string data.
+		/// \param order Matrix element order (RowMajor or ColumnMajor).
+		/// \return `std::array<Cell, rows*columns>`
 		/// \throws ParseError
 		template<std::size_t rows, std::size_t columns, typename Cell = CellStringReference>
 		constexpr auto parseToArray(std::string_view data, MatrixOrder order) const;

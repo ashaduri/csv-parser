@@ -98,3 +98,4 @@ include(CTest)
 include(catch2/Catch.cmake)
 catch_discover_tests(test_csv_parser)
 
+add_subdirectory (doc)

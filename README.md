@@ -21,7 +21,7 @@
 
 #### Example:
 
-``` C++
+```cpp
 #include "csv_parser.h"
 
 // ...
@@ -67,7 +67,7 @@ std::cout << "Column 1, row 1: " << cell_refs[1][1].getDouble().value() << std::
 
 #### Example:
 
-``` C++
+```cpp
 #include "csv_parser.h"
 
 // ...
@@ -118,7 +118,7 @@ Currently, parsing at compile-time has some restrictions:
 One (possibly useful) consequence of compile-time parsing is that a parse error also causes a compilation error. 
 
 #### Example:
-``` C++
+```cpp
 #include "csv_parser.h"
 
 // ...
