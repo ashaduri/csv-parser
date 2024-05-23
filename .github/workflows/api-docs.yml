@@ -2,6 +2,9 @@ name: API Documentation
 
 on: [push, workflow_dispatch]
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -36,13 +39,12 @@ jobs:
 
       - name: Create .nojekyll (ensures pages with underscores work on gh pages)
         shell: bash
-        run: touch doc/html/.nojekyll
+        run: touch build/doc/html/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: doc/html
+          folder: build/doc/html
           # target-folder: /
 
