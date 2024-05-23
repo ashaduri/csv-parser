@@ -15,6 +15,10 @@
 - Supports reading data as different types (string, double, empty field) (runtime only).
 - Extensively tested using [Catch2](https://github.com/catchorg/Catch2).
 
+## API Reference
+
+Automatically generated [API reference](https://ashaduri.github.io/csv-parser/) describes the public API in detail.
+
 ## Usage Examples
 
 ### Runtime Parsing into 2D std::vector

@@ -90,11 +90,14 @@ class Parser {
 
 
 		/// Parse CSV string data into a vector of columns. The innermost type may be one of Cell* classes
-		// (e.g., CellReference), or a primitive numeric type (e.g., double).
+		/// (e.g., CellReference), or a primitive numeric type (e.g., double).
 		/// \tparam Vector2D A 2D vector type, e.g. `std::vector<std::vector<CellReference>>`, deduced automatically.
 		/// \param data Full CSV string data.
 		/// \param[out] values An empty 2D vector to store the data in.
 		/// \throws ParseError
+		///
+		/// Example:
+		/// \include example_runtime.cpp
 		template<typename Vector2D>
 		constexpr void parseTo2DVector(std::string_view data, Vector2D& values) const;
 
@@ -107,6 +110,9 @@ class Parser {
 		/// \param data Full CSV string data.
 		/// \return `std::array<std::array<Cell, rows>, columns>`
 		/// \throws ParseError
+		///
+		/// Example:
+		/// \include example_compiletime.cpp
 		template<std::size_t rows, std::size_t columns, typename Cell = CellStringReference>
 		constexpr auto parseTo2DArray(std::string_view data) const;
 
@@ -118,6 +124,9 @@ class Parser {
 		/// \param[out] values A flat (empty) matrix. This will be resized automatically.
 		/// \return Matrix information
 		/// \throws ParseError
+		///
+		/// Example:
+		/// \include example_runtime_numeric.cpp
 		template<typename Vector>
 		constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector& values) const;
 
