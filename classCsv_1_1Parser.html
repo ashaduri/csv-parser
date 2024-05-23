@@ -95,7 +95,7 @@ constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 <tr class="separator:a0c1be5a60b5678b0faa06c5cf5812ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add6271c8b7bd1d239dd2d2cd5bc636de"><td class="memTemplParams" colspan="2">template&lt;typename Vector2D &gt; </td></tr>
 <tr class="memitem:add6271c8b7bd1d239dd2d2cd5bc636de"><td class="memTemplItemLeft" align="right" valign="top">constexpr void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">parseTo2DVector</a> (std::string_view data, Vector2D &amp;values) const</td></tr>
-<tr class="memdesc:add6271c8b7bd1d239dd2d2cd5bc636de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse CSV string data into a vector of columns. The innermost type may be one of Cell* classes.  <a href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">More...</a><br /></td></tr>
+<tr class="memdesc:add6271c8b7bd1d239dd2d2cd5bc636de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse CSV string data into a vector of columns.  <a href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">More...</a><br /></td></tr>
 <tr class="separator:add6271c8b7bd1d239dd2d2cd5bc636de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc7cef24a3000d3c954c8a3abca3e75c"><td class="memTemplParams" colspan="2">template&lt;std::size_t rows, std::size_t columns, typename Cell  = CellStringReference&gt; </td></tr>
 <tr class="memitem:acc7cef24a3000d3c954c8a3abca3e75c"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCsv_1_1Parser.html#acc7cef24a3000d3c954c8a3abca3e75c">parseTo2DArray</a> (std::string_view data) const</td></tr>
@@ -251,7 +251,60 @@ template&lt;std::size_t rows, std::size_t columns, typename Cell &gt; </div>
 <dl class="section return"><dt>Returns</dt><dd><code>std::array&lt;std::array&lt;Cell, rows&gt;, columns&gt;</code> </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classCsv_1_1ParseError.html" title="Exception thrown on CSV parse error.">ParseError</a></td><td></td></tr>
+    <tr><td class="paramname"><a class="el" href="classCsv_1_1ParseError.html" title="Exception thrown on CSV parse error.">ParseError</a></td><td>Example: <div class="fragment"><div class="line"><span class="comment">/**************************************************************************</span></div>
+<div class="line"><span class="comment">Copyright (C) 2021 Alexander Shaduri</span></div>
+<div class="line"><span class="comment">License: 0BSD (Zero-Clause BSD)</span></div>
+<div class="line"><span class="comment">***************************************************************************/</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="csv__parser_8h.html">csv_parser.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;cstdlib&gt;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">using namespace </span>std::string_view_literals;</div>
+<div class="line"> </div>
+<div class="line">    constexpr std::string_view data =</div>
+<div class="line">R<span class="stringliteral">&quot;(abc,5</span></div>
+<div class="line"><span class="stringliteral">,&quot;with &quot;&quot;quote inside&quot;</span></div>
+<div class="line"><span class="stringliteral">NaN, -Inf</span></div>
+<div class="line"><span class="stringliteral">)&quot;sv;</span></div>
+<div class="line"><span class="stringliteral">    constexpr std::size_t columns = 2, rows = 3;</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    constexpr <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    </span><span class="comment">// parse into std::array&lt;std::array&lt;CellStringReference, rows&gt;, columns&gt;</span></div>
+<div class="line">    constexpr <span class="keyword">auto</span> matrix = parser.<a class="code" href="classCsv_1_1Parser.html#acc7cef24a3000d3c954c8a3abca3e75c">parseTo2DArray</a>&lt;rows, columns&gt;(data);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Verify the data at compile time.</span></div>
+<div class="line">    static_assert(matrix[0][0].getOriginalStringView() == <span class="stringliteral">&quot;abc&quot;</span>sv);</div>
+<div class="line">    static_assert(matrix[1][0].getOriginalStringView() == <span class="stringliteral">&quot;5&quot;</span>sv);</div>
+<div class="line">    static_assert(matrix[0][1].getOriginalStringView().empty());</div>
+<div class="line">    static_assert(matrix[1][1].getCleanStringBuffer&lt;R<span class="stringliteral">&quot;(with &quot;&quot;quote inside)&quot;sv.size()&gt;().getStringView()</span></div>
+<div class="line"><span class="stringliteral">            == R</span><span class="stringliteral">&quot;(with &quot;quote inside)&quot;sv);</span></div>
+<div class="line"><span class="stringliteral">    static_assert(matrix[0][2].getOriginalStringView() == </span><span class="stringliteral">&quot;NaN&quot;</span>sv);</div>
+<div class="line">    static_assert(matrix[1][2].getOriginalStringView() == <span class="stringliteral">&quot; -Inf&quot;</span>sv);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// To support consecutive double-quote collapsing at compile-time, allocate a compile-time</span></div>
+<div class="line">    <span class="comment">// buffer to place the clean string inside. The buffer size has to be at least that</span></div>
+<div class="line">    <span class="comment">// of an uncollapsed string value.</span></div>
+<div class="line">    <span class="comment">// If the buffer is too small, the code will simply not compile.</span></div>
+<div class="line">    constexpr <span class="keyword">auto</span> buffer_size = matrix[1][1].getRequiredBufferSize();  <span class="comment">// uncollapsed size</span></div>
+<div class="line">    constexpr <span class="keyword">auto</span> buffer = matrix[1][1].getCleanStringBuffer&lt;buffer_size&gt;();</div>
+<div class="line">    static_assert(buffer.getStringView() == R<span class="stringliteral">&quot;(with &quot;quote inside)&quot;sv);</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    </span><span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="ttc" id="aclassCsv_1_1Parser_html"><div class="ttname"><a href="classCsv_1_1Parser.html">Csv::Parser</a></div><div class="ttdoc">The main CSV parser class.</div><div class="ttdef"><b>Definition:</b> csv_parser.h:69</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_acc7cef24a3000d3c954c8a3abca3e75c"><div class="ttname"><a href="classCsv_1_1Parser.html#acc7cef24a3000d3c954c8a3abca3e75c">Csv::Parser::parseTo2DArray</a></div><div class="ttdeci">constexpr auto parseTo2DArray(std::string_view data) const</div><div class="ttdoc">Parse CSV string to 2D std::array, an array of columns.</div><div class="ttdef"><b>Definition:</b> csv_parser.h:524</div></div>
+<div class="ttc" id="acsv__parser_8h_html"><div class="ttname"><a href="csv__parser_8h.html">csv_parser.h</a></div><div class="ttdoc">Main include file for the library.</div></div>
+</div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
@@ -294,8 +347,8 @@ template&lt;typename Vector2D &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Parse CSV string data into a vector of columns. The innermost type may be one of Cell* classes. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Parse CSV string data into a vector of columns. </p>
+<p>The innermost type may be one of Cell* classes (e.g., <a class="el" href="classCsv_1_1CellReference.html" title="Data inside a single cell, potentially stored as a reference to the original data.">CellReference</a>), or a primitive numeric type (e.g., double). </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Vector2D</td><td>A 2D vector type, e.g. <code>std::vector&lt;std::vector&lt;<a class="el" href="classCsv_1_1CellReference.html" title="Data inside a single cell, potentially stored as a reference to the original data.">CellReference</a>&gt;&gt;</code>, deduced automatically. </td></tr>
   </table>
@@ -310,7 +363,126 @@ template&lt;typename Vector2D &gt; </div>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classCsv_1_1ParseError.html" title="Exception thrown on CSV parse error.">ParseError</a></td><td></td></tr>
+    <tr><td class="paramname"><a class="el" href="classCsv_1_1ParseError.html" title="Exception thrown on CSV parse error.">ParseError</a></td><td>Example: <div class="fragment"><div class="line"><span class="comment">/**************************************************************************</span></div>
+<div class="line"><span class="comment">Copyright (C) 2021 Alexander Shaduri</span></div>
+<div class="line"><span class="comment">License: 0BSD (Zero-Clause BSD)</span></div>
+<div class="line"><span class="comment">***************************************************************************/</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="csv__parser_8h.html">csv_parser.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;cstdlib&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Example of parsing predefined data and checking it at runtime</span></div>
+<div class="line"><span class="keywordtype">int</span> parsePredefinedData()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">using namespace </span>std::string_view_literals;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Data to parse</span></div>
+<div class="line">    std::string_view data = <span class="stringliteral">&quot;abc,def\n5,6&quot;</span>sv;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Let &quot;cell_refs&quot; be a vector of columns.</span></div>
+<div class="line">    <span class="comment">// After parsing, each element will contain a std::string_view referencing a part of the original data.</span></div>
+<div class="line">    std::vector&lt;std::vector&lt;Csv::CellReference&gt;&gt; cell_refs;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span> {</div>
+<div class="line">        <span class="comment">// This throws ParseError on error.</span></div>
+<div class="line">        parser.<a class="code" href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">parseTo2DVector</a>(data, cell_refs);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span>(<a class="code" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    assert(cell_refs.size() == 2);</div>
+<div class="line">    assert(cell_refs[0].size() == 2);</div>
+<div class="line">    assert(cell_refs[1].size() == 2);</div>
+<div class="line"> </div>
+<div class="line">    assert(cell_refs[0][0].getType() == Csv::CellType::String);</div>
+<div class="line">    assert(cell_refs[1][0].getType() == Csv::CellType::String);</div>
+<div class="line">    assert(cell_refs[0][1].getType() == Csv::CellType::Double);</div>
+<div class="line">    assert(cell_refs[1][1].getType() == Csv::CellType::Double);</div>
+<div class="line"> </div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;Column 0, row 0: &quot;</span> &lt;&lt; cell_refs[0][0].getCleanString().value() &lt;&lt; std::endl;  <span class="comment">// abc</span></div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;Column 1, row 0: &quot;</span> &lt;&lt; cell_refs[1][0].getCleanString().value() &lt;&lt; std::endl;  <span class="comment">// def</span></div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;Column 0, row 1: &quot;</span> &lt;&lt; cell_refs[0][1].getDouble().value() &lt;&lt; std::endl;  <span class="comment">// 5</span></div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;Column 1, row 1: &quot;</span> &lt;&lt; cell_refs[1][1].getDouble().value() &lt;&lt; std::endl;  <span class="comment">// 6</span></div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (argc &lt;= 1) {</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;File not specified, using predefined data.&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> parsePredefinedData();</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Load file from parameter</span></div>
+<div class="line">    std::string input_file = (argv[1] ? argv[1] : <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Read the file to string (inefficient method, but valid for this example)</span></div>
+<div class="line">    std::ifstream ifs(input_file, std::ios::binary);</div>
+<div class="line">    <span class="keywordflow">if</span> (!ifs.is_open()) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;Failed to open input file &quot;</span> &lt;&lt; input_file &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    std::string csv_data((std::istreambuf_iterator&lt;char&gt;(ifs)), (std::istreambuf_iterator&lt;char&gt;()));</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Let &quot;cell_refs&quot; be a vector of columns.</span></div>
+<div class="line">    <span class="comment">// After parsing, each element will contain std::string_view referencing a part of the original data.</span></div>
+<div class="line">    <span class="comment">// Note: CellReference must NOT outlive csv_data. If it has to, use CellValue class instead.</span></div>
+<div class="line">    std::vector&lt;std::vector&lt;Csv::CellReference&gt;&gt; cell_refs;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span> {</div>
+<div class="line">        <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"> </div>
+<div class="line">        <span class="comment">// This throws ParseError on error.</span></div>
+<div class="line">        parser.<a class="code" href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">parseTo2DVector</a>(csv_data, cell_refs);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span>(<a class="code" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">for</span> (std::size_t column = 0; column &lt; cell_refs.size(); ++column) {</div>
+<div class="line">        <span class="keywordflow">for</span> (std::size_t row = 0; row &lt; cell_refs[column].size(); ++row) {</div>
+<div class="line">            <span class="keyword">const</span> <span class="keyword">auto</span>&amp; cell = cell_refs[column][row];</div>
+<div class="line">            std::string formatted;</div>
+<div class="line">            <span class="keywordflow">switch</span>(cell.getType()) {</div>
+<div class="line">                <span class="keywordflow">case</span> Csv::CellType::Empty:</div>
+<div class="line">                    formatted = <span class="stringliteral">&quot;[empty]&quot;</span>;</div>
+<div class="line">                    <span class="keywordflow">break</span>;</div>
+<div class="line">                <span class="keywordflow">case</span> Csv::CellType::Double:</div>
+<div class="line">                    formatted = std::to_string(cell.getDouble().value());</div>
+<div class="line">                    <span class="keywordflow">break</span>;</div>
+<div class="line">                <span class="keywordflow">case</span> Csv::CellType::String:</div>
+<div class="line">                    formatted = cell.getCleanString().value();</div>
+<div class="line">                    <span class="keywordflow">break</span>;</div>
+<div class="line">            }</div>
+<div class="line">            std::cout &lt;&lt; <span class="stringliteral">&quot;(row: &quot;</span> &lt;&lt; (row+1) &lt;&lt; <span class="stringliteral">&quot;, col: &quot;</span> &lt;&lt; (column+1) &lt;&lt; <span class="stringliteral">&quot;): &quot;</span> &lt;&lt; formatted &lt;&lt; std::endl;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="ttc" id="aclassCsv_1_1ParseError_html"><div class="ttname"><a href="classCsv_1_1ParseError.html">Csv::ParseError</a></div><div class="ttdoc">Exception thrown on CSV parse error.</div><div class="ttdef"><b>Definition:</b> csv_error.h:25</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_add6271c8b7bd1d239dd2d2cd5bc636de"><div class="ttname"><a href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">Csv::Parser::parseTo2DVector</a></div><div class="ttdeci">constexpr void parseTo2DVector(std::string_view data, Vector2D &amp;values) const</div><div class="ttdoc">Parse CSV string data into a vector of columns.</div><div class="ttdef"><b>Definition:</b> csv_parser.h:503</div></div>
+</div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
@@ -511,7 +683,192 @@ template&lt;typename Vector &gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>Matrix information </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname"><a class="el" href="classCsv_1_1ParseError.html" title="Exception thrown on CSV parse error.">ParseError</a></td><td></td></tr>
+    <tr><td class="paramname"><a class="el" href="classCsv_1_1ParseError.html" title="Exception thrown on CSV parse error.">ParseError</a></td><td>Example: <div class="fragment"><div class="line"><span class="comment">/**************************************************************************</span></div>
+<div class="line"><span class="comment">Copyright (C) 2022 Alexander Shaduri</span></div>
+<div class="line"><span class="comment">License: 0BSD (Zero-Clause BSD)</span></div>
+<div class="line"><span class="comment">***************************************************************************/</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="csv__parser_8h.html">csv_parser.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;cstdlib&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Example of parsing using 2D vector of CellDoubleValue objects</span></div>
+<div class="line"><span class="keywordtype">int</span> parseUsingCellDoubleValue(std::string_view csv_data)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// Let &quot;cell_values&quot; be a vector of columns.</span></div>
+<div class="line">    <span class="comment">// After parsing, each element will contain a double value.</span></div>
+<div class="line">    std::vector&lt;std::vector&lt;Csv::CellDoubleValue&gt;&gt; cell_values;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span> {</div>
+<div class="line">        <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"> </div>
+<div class="line">        <span class="comment">// This throws ParseError on error.</span></div>
+<div class="line">        parser.<a class="code" href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">parseTo2DVector</a>(csv_data, cell_values);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span>(<a class="code" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">for</span> (std::size_t column = 0; column &lt; cell_values.size(); ++column) {</div>
+<div class="line">        <span class="keywordflow">for</span> (std::size_t row = 0; row &lt; cell_values[column].size(); ++row) {</div>
+<div class="line">            <span class="keyword">const</span> <span class="keyword">auto</span>&amp; cell = cell_values[column][row];</div>
+<div class="line">            std::string formatted = std::to_string(cell.getValue());</div>
+<div class="line">            std::cout &lt;&lt; <span class="stringliteral">&quot;(row: &quot;</span> &lt;&lt; (row+1) &lt;&lt; <span class="stringliteral">&quot;, col: &quot;</span> &lt;&lt; (column+1) &lt;&lt; <span class="stringliteral">&quot;): &quot;</span> &lt;&lt; formatted &lt;&lt; std::endl;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Example of parsing using 2D vector of double</span></div>
+<div class="line"><span class="keywordtype">int</span> parseUsingDouble(std::string_view csv_data)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// Let &quot;cell_values&quot; be a vector of columns.</span></div>
+<div class="line">    <span class="comment">// After parsing, each element will contain a double value.</span></div>
+<div class="line">    std::vector&lt;std::vector&lt;double&gt;&gt; cell_values;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span> {</div>
+<div class="line">        <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"> </div>
+<div class="line">        <span class="comment">// This throws ParseError on error.</span></div>
+<div class="line">        parser.<a class="code" href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">parseTo2DVector</a>(csv_data, cell_values);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span>(<a class="code" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">for</span> (std::size_t column = 0; column &lt; cell_values.size(); ++column) {</div>
+<div class="line">        <span class="keywordflow">for</span> (std::size_t row = 0; row &lt; cell_values[column].size(); ++row) {</div>
+<div class="line">            <span class="keyword">const</span> <span class="keyword">auto</span>&amp; cell = cell_values[column][row];</div>
+<div class="line">            std::string formatted = std::to_string(cell);</div>
+<div class="line">            std::cout &lt;&lt; <span class="stringliteral">&quot;(row: &quot;</span> &lt;&lt; (row+1) &lt;&lt; <span class="stringliteral">&quot;, col: &quot;</span> &lt;&lt; (column+1) &lt;&lt; <span class="stringliteral">&quot;): &quot;</span> &lt;&lt; formatted &lt;&lt; std::endl;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Example of parsing to 1D vector (row-major ordering of flattened matrix).</span></div>
+<div class="line"><span class="comment">// Float is used as storage type.</span></div>
+<div class="line"><span class="keywordtype">int</span> parseUsingVectorRowMajor(std::string_view csv_data)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// Let &quot;cell_values&quot; be a matrix in row-major format.</span></div>
+<div class="line">    std::vector&lt;float&gt; cell_values;</div>
+<div class="line">    <a class="code" href="classCsv_1_1MatrixInformation.html">Csv::MatrixInformation</a> info;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span> {</div>
+<div class="line">        <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"> </div>
+<div class="line">        <span class="comment">// This throws ParseError on error.</span></div>
+<div class="line">        info = parser.<a class="code" href="classCsv_1_1Parser.html#a6c73a0c197d6087f854ea4a46c6f9631">parseToVectorRowMajor</a>(csv_data, cell_values);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span>(<a class="code" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">for</span> (std::size_t column = 0; column &lt; info.<a class="code" href="classCsv_1_1MatrixInformation.html#a6cef576cad568c4dc92ec8d7233ff0b6">getColumns</a>(); ++column) {</div>
+<div class="line">        <span class="keywordflow">for</span> (std::size_t row = 0; row &lt; info.<a class="code" href="classCsv_1_1MatrixInformation.html#a60f9385f02bfcd80372ebc977c757a47">getRows</a>(); ++row) {</div>
+<div class="line">            <span class="keyword">auto</span> value = cell_values.at(info.<a class="code" href="classCsv_1_1MatrixInformation.html#a892efedc00f6f80a09b90744856977a5">matrixIndex</a>(row, column));</div>
+<div class="line">            std::string formatted = std::to_string(value);</div>
+<div class="line">            std::cout &lt;&lt; <span class="stringliteral">&quot;(row: &quot;</span> &lt;&lt; (row+1) &lt;&lt; <span class="stringliteral">&quot;, col: &quot;</span> &lt;&lt; (column+1) &lt;&lt; <span class="stringliteral">&quot;): &quot;</span> &lt;&lt; formatted &lt;&lt; std::endl;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Example of parsing to 1D vector (column-major ordering of flattened matrix).</span></div>
+<div class="line"><span class="comment">// Long double is used as storage type.</span></div>
+<div class="line"><span class="keywordtype">int</span> parseUsingVectorColumnMajor(std::string_view csv_data, std::size_t num_rows)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// Let &quot;cell_values&quot; be a matrix in column-major format.</span></div>
+<div class="line">    std::vector&lt;long double&gt; cell_values;</div>
+<div class="line">    <a class="code" href="classCsv_1_1MatrixInformation.html">Csv::MatrixInformation</a> info;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">try</span> {</div>
+<div class="line">        <a class="code" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"> </div>
+<div class="line">        <span class="comment">// This throws ParseError on error.</span></div>
+<div class="line">        info = parser.<a class="code" href="classCsv_1_1Parser.html#a0d5134990de91404515cd0adc3d22967">parseToVectorColumnMajor</a>(csv_data, cell_values, num_rows, std::nullopt);</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">catch</span>(<a class="code" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">for</span> (std::size_t column = 0; column &lt; info.<a class="code" href="classCsv_1_1MatrixInformation.html#a6cef576cad568c4dc92ec8d7233ff0b6">getColumns</a>(); ++column) {</div>
+<div class="line">        <span class="keywordflow">for</span> (std::size_t row = 0; row &lt; info.<a class="code" href="classCsv_1_1MatrixInformation.html#a60f9385f02bfcd80372ebc977c757a47">getRows</a>(); ++row) {</div>
+<div class="line">            <span class="keyword">auto</span> value = cell_values.at(info.<a class="code" href="classCsv_1_1MatrixInformation.html#a892efedc00f6f80a09b90744856977a5">matrixIndex</a>(row, column));</div>
+<div class="line">            std::string formatted = std::to_string(value);</div>
+<div class="line">            std::cout &lt;&lt; <span class="stringliteral">&quot;(row: &quot;</span> &lt;&lt; (row+1) &lt;&lt; <span class="stringliteral">&quot;, col: &quot;</span> &lt;&lt; (column+1) &lt;&lt; <span class="stringliteral">&quot;): &quot;</span> &lt;&lt; formatted &lt;&lt; std::endl;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (argc &lt;= 1) {</div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Usage: &quot;</span> &lt;&lt; argv[0] &lt;&lt; <span class="stringliteral">&quot; &lt;input.csv&gt; [&lt;rows&gt;]&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Load file from parameter</span></div>
+<div class="line">    std::string input_file = (argv[1] ? argv[1] : <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line">    <span class="keywordtype">int</span> num_rows = std::stoi(argv[2] ? argv[2] : <span class="stringliteral">&quot;0&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Read the file to string (inefficient method, but valid for this example)</span></div>
+<div class="line">    std::ifstream ifs(input_file, std::ios::binary);</div>
+<div class="line">    <span class="keywordflow">if</span> (!ifs.is_open()) {</div>
+<div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;Failed to open input file &quot;</span> &lt;&lt; input_file &lt;&lt; std::endl;</div>
+<div class="line">        <span class="keywordflow">return</span> EXIT_FAILURE;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    std::string csv_data((std::istreambuf_iterator&lt;char&gt;(ifs)), (std::istreambuf_iterator&lt;char&gt;()));</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordtype">int</span> cell_double_value_status = parseUsingCellDoubleValue(csv_data);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordtype">int</span> double_status = parseUsingDouble(csv_data);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordtype">int</span> matrix_row_major_status = parseUsingVectorRowMajor(csv_data);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// The number of rows *must* be given when doing column-major parsing.</span></div>
+<div class="line">    <span class="keywordtype">int</span> matrix_column_major_status = EXIT_SUCCESS;</div>
+<div class="line">    <span class="keywordflow">if</span> (num_rows &gt; 0) {</div>
+<div class="line">        matrix_column_major_status = parseUsingVectorColumnMajor(csv_data, num_rows);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> cell_double_value_status || double_status || matrix_row_major_status || matrix_column_major_status;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="ttc" id="aclassCsv_1_1MatrixInformation_html"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html">Csv::MatrixInformation</a></div><div class="ttdoc">Matrix information (dimensions, order).</div><div class="ttdef"><b>Definition:</b> csv_matrix.h:32</div></div>
+<div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a60f9385f02bfcd80372ebc977c757a47"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a60f9385f02bfcd80372ebc977c757a47">Csv::MatrixInformation::getRows</a></div><div class="ttdeci">constexpr std::size_t getRows() const</div><div class="ttdoc">Get number of rows in matrix.</div><div class="ttdef"><b>Definition:</b> csv_matrix.h:64</div></div>
+<div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a6cef576cad568c4dc92ec8d7233ff0b6"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a6cef576cad568c4dc92ec8d7233ff0b6">Csv::MatrixInformation::getColumns</a></div><div class="ttdeci">constexpr std::size_t getColumns() const</div><div class="ttdoc">Get number of columns in matrix.</div><div class="ttdef"><b>Definition:</b> csv_matrix.h:78</div></div>
+<div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a892efedc00f6f80a09b90744856977a5"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a892efedc00f6f80a09b90744856977a5">Csv::MatrixInformation::matrixIndex</a></div><div class="ttdeci">static constexpr std::size_t matrixIndex(std::size_t row, std::size_t column, std::size_t rows, std::size_t columns, MatrixOrder order)</div><div class="ttdoc">Get index (offset) in flat-matrix vector.</div><div class="ttdef"><b>Definition:</b> csv_matrix.h:42</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_a0d5134990de91404515cd0adc3d22967"><div class="ttname"><a href="classCsv_1_1Parser.html#a0d5134990de91404515cd0adc3d22967">Csv::Parser::parseToVectorColumnMajor</a></div><div class="ttdeci">constexpr MatrixInformation parseToVectorColumnMajor(std::string_view data, Vector &amp;values, std::size_t rows, std::optional&lt; std::size_t &gt; columns_hint) const</div><div class="ttdoc">Parse CSV string data into a flat matrix in column-major format (A11, A21, A31, A12,...</div><div class="ttdef"><b>Definition:</b> csv_parser.h:610</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_a6c73a0c197d6087f854ea4a46c6f9631"><div class="ttname"><a href="classCsv_1_1Parser.html#a6c73a0c197d6087f854ea4a46c6f9631">Csv::Parser::parseToVectorRowMajor</a></div><div class="ttdeci">constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector &amp;values) const</div><div class="ttdoc">Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ....</div><div class="ttdef"><b>Definition:</b> csv_parser.h:543</div></div>
+</div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
