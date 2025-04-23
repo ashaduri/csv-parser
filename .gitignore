@@ -34,3 +34,4 @@
 # IDE / build files
 /.idea
 /cmake-build-*
+/.codebuddy
