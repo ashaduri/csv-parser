@@ -149,15 +149,11 @@ TEST_CASE("CsvCellClasses", "[csv][parser][cell]")
 			REQUIRE(has_escaped_quotes);
 			REQUIRE(cell_refs.at(1).at(0).getCleanString() == "c\"d"s);
 
-			auto large_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<4>();
-			REQUIRE(large_buffer.isValid());
-			REQUIRE(large_buffer.getStringView() == "c\"d"sv);  // throwing
-			REQUIRE(large_buffer.getOptionalStringView() == "c\"d"sv);
+			auto large_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<3>();
+			REQUIRE(large_buffer.getStringView() == "c\"d"sv);
 
-			auto small_buffer = cell_refs.at(1).at(0).getCleanStringBuffer<3>();
-			REQUIRE_FALSE(small_buffer.isValid());
-			REQUIRE_THROWS_AS(small_buffer.getStringView(), std::out_of_range);
-			REQUIRE_FALSE(small_buffer.getOptionalStringView().has_value());
+			// small buffer - constructor throws.
+			REQUIRE_THROWS_AS(cell_refs.at(1).at(0).getCleanStringBuffer<2>(), std::out_of_range);
 		}
 		{
 			bool has_escaped_quotes = false;

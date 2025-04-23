@@ -37,9 +37,9 @@ NaN, -Inf
 
 	// To support consecutive double-quote collapsing at compile-time, allocate a compile-time
 	// buffer to place the clean string inside. The buffer size has to be at least that
-	// of an uncollapsed string value.
+	// of a collapsed string value.
 	// If the buffer is too small, the code will simply not compile.
-	constexpr auto buffer_size = matrix[1][1].getRequiredBufferSize();  // uncollapsed size
+	constexpr auto buffer_size = matrix[1][1].getRequiredBufferSize();  // collapsed size
 	constexpr auto buffer = matrix[1][1].getCleanStringBuffer<buffer_size>();
 	static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
 

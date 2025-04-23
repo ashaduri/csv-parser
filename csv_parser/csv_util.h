@@ -38,6 +38,12 @@ namespace internal {
 inline std::string cleanString(std::string_view view);
 
 
+/// Get size of a cleaned-up string given the uncollapsed string.
+/// \param uncollapsed_view Input string
+/// \return Size of the cleaned-up string
+inline constexpr std::size_t getCleanStringSize(std::string_view uncollapsed_view);
+
+
 /// Try to read a numeric value from string data.
 /// Unless the string data completely represents a serialized int/float/double/..., `std::nullopt` is returned.
 /// \note This function is locale-dependent.
@@ -76,6 +82,22 @@ std::string cleanString(std::string_view view)
 		}
 	}
 	return s;
+}
+
+
+
+constexpr std::size_t getCleanStringSize(std::string_view uncollapsed_view)
+{
+	// Count the number of quotes in the string. Since quotes are doubled,
+	// subtract half.
+	// std::count is not constexpr in C++17, so we have to do it manually.
+	std::size_t quote_count = 0;
+	for (char c : uncollapsed_view) {
+		if (c == '\"') {
+			++quote_count;
+		}
+	}
+	return uncollapsed_view.size() - (quote_count / 2);
 }
 
 

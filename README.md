@@ -1,6 +1,7 @@
 # Csv::Parser (csv-parser)
 ***Compile-time and runtime CSV parser written in C++17***
 
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ashaduri/csv-parser?label=Version)](https://github.com/ashaduri/csv-parser)
 ![GitHub](https://img.shields.io/github/license/ashaduri/csv-parser)
 ![Language](https://img.shields.io/badge/language-ISO%20C++17-blue)
 
@@ -150,9 +151,9 @@ static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 
 // To support consecutive double-quote collapsing at compile-time, allocate a compile-time
 // buffer to place the clean string inside. The buffer size has to be at least that
-// of an uncollapsed string value.
+// of a collapsed string value.
 // If the buffer is too small, the code will simply not compile.
-constexpr auto buffer_size = matrix[0][1].getRequiredBufferSize();  // uncollapsed size
+constexpr auto buffer_size = matrix[0][1].getRequiredBufferSize();  // collapsed size
 constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
 static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
 ```

@@ -51,24 +51,15 @@ template<std::size_t Size>
 class CellStringBuffer {
 	public:
 
-		/// Constructor. Copies the cell data into the buffer.
-		/// If the cell data size is greater than the buffer size, the buffer is marked as invalid
-		/// and isValid() will return false.
-		/// \param cell Cell data to copy into the buffer.
+		/// Constructor. Copies the cleaned-up cell data into the buffer.
+		/// \param cell Cell data to clean up and copy into the buffer.
 		/// \param has_escaped_quotes If true, the data in cell is cleaned up (unescaped)
 		/// before being copied into the buffer.
+		/// \throw std::out_of_range if the buffer is too small to hold the cleaned-up string.
 		constexpr inline explicit CellStringBuffer(std::string_view cell, bool has_escaped_quotes);
 
-		/// Check if the buffer was successfully created and contains data.
-		[[nodiscard]] constexpr bool isValid() const noexcept;
-
 		/// Return a string view to the stored data.
-		/// \throw std::out_of_range if buffer is invalid (of insufficient size)
 		[[nodiscard]] constexpr std::string_view getStringView() const;
-
-		/// Return string view to the stored data.
-		/// \return `std::nullopt` if buffer is invalid (of insufficient size)
-		[[nodiscard]] constexpr std::optional<std::string_view> getOptionalStringView() const noexcept;
 
 		/// Return buffer size, as determined by the template parameter.
 		[[nodiscard]] constexpr std::size_t getBufferSize() const noexcept;
@@ -79,10 +70,10 @@ class CellStringBuffer {
 		struct Buffer {
 			std::array<char, Size> buffer = { };
 			std::size_t size = 0;
-			bool valid = false;
 		};
 
-		/// Create a buffer object, with cleaned-up input in it
+		/// Create a buffer object, with optionally cleaned-up input in it.
+		/// \throw std::out_of_range if the buffer is too small to hold the cleaned-up string.
 		[[nodiscard]] constexpr static Buffer prepareBuffer(std::string_view input, bool has_escaped_quotes);
 
 		/// Unescape a string view to newly created buffer
@@ -333,31 +324,9 @@ constexpr CellStringBuffer<Size>::CellStringBuffer(std::string_view cell, bool h
 
 
 template<std::size_t Size>
-constexpr bool CellStringBuffer<Size>::isValid() const noexcept
-{
-	return buffer_.valid;
-}
-
-
-
-template<std::size_t Size>
 constexpr std::string_view CellStringBuffer<Size>::getStringView() const
 {
-	if (!buffer_.valid) {
-		throw std::out_of_range("Insufficient buffer size");
-	}
 	return {buffer_.buffer.data(), buffer_.size};
-}
-
-
-
-template<std::size_t Size>
-constexpr std::optional<std::string_view> CellStringBuffer<Size>::getOptionalStringView() const noexcept
-{
-	if (!buffer_.valid) {
-		return std::nullopt;
-	}
-	return std::string_view{buffer_.buffer.data(), buffer_.size};
 }
 
 
@@ -371,20 +340,22 @@ constexpr std::size_t CellStringBuffer<Size>::getBufferSize() const noexcept
 
 
 template<std::size_t Size>
-constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::prepareBuffer(std::string_view input, bool
-has_escaped_quotes)
+constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::prepareBuffer(
+		std::string_view input, bool has_escaped_quotes)
 {
-	if (Size < input.size()) {
-		return Buffer{};
-	}
 	if (has_escaped_quotes) {
+		// cleanString will throw if the buffer is too small
 		return cleanString(input);
 	}
+
+	if (Size < input.size()) {
+		throw std::out_of_range("Insufficient buffer size");
+	}
 	std::array<char, Size> buffer = { };
-	for (std::size_t pos = 0; pos < std::min(Size, input.size()); ++pos) {
+	for (std::size_t pos = 0; pos < input.size(); ++pos) {
 		buffer[pos] = input[pos];
 	}
-	return Buffer{buffer, input.size(), true};
+	return Buffer{buffer, input.size()};
 }
 
 
@@ -392,9 +363,12 @@ has_escaped_quotes)
 template<std::size_t Size>
 constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::cleanString(std::string_view input)
 {
+	if (Size < getCleanStringSize(input)) {
+		throw std::out_of_range("Insufficient buffer size");
+	}
 	std::array<char, Size> buffer = { };
 	std::size_t output_pos = 0;
-	for (std::size_t input_pos = 0; input_pos < std::min(Size, input.size()); ++input_pos) {
+	for (std::size_t input_pos = 0; input_pos < input.size(); ++input_pos) {
 		char c = input[input_pos];
 		buffer[output_pos] = c;
 		++output_pos;
@@ -402,7 +376,7 @@ constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::cleanS
 			++input_pos;
 		}
 	}
-	return {buffer, output_pos, true};
+	return {buffer, output_pos};
 }
 
 
@@ -621,7 +595,7 @@ constexpr CellStringBuffer<BufferSize> CellStringReference::getCleanStringBuffer
 
 constexpr std::size_t CellStringReference::getRequiredBufferSize() const
 {
-	return value_.size();
+	return getCleanStringSize(value_);
 }
 
 

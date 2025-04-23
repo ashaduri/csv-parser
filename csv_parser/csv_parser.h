@@ -560,7 +560,7 @@ constexpr MatrixInformation Parser::parseToVectorRowMajor(std::string_view data,
 	info.setOrder(MatrixOrder::RowMajor);
 
 	bool unknown_columns = !columns.has_value();
-	if (columns.has_value()) {
+	if (!unknown_columns) {
 		info.setColumns(columns.value());
 	}
 	std::size_t read_columns = 0;
