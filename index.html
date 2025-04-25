@@ -22,7 +22,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">csv-parser<span id="projectnumber">&#160;1.0.1</span>
+   <div id="projectname">csv-parser<span id="projectnumber">&#160;1.1.0</span>
    </div>
    <div id="projectbrief">Csv::Parser (csv-parser)</div>
   </td>
@@ -190,7 +190,7 @@ Example:</h3>
 <div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a892efedc00f6f80a09b90744856977a5"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a892efedc00f6f80a09b90744856977a5">Csv::MatrixInformation::matrixIndex</a></div><div class="ttdeci">static constexpr std::size_t matrixIndex(std::size_t row, std::size_t column, std::size_t rows, std::size_t columns, MatrixOrder order)</div><div class="ttdoc">Get index (offset) in flat-matrix vector.</div><div class="ttdef"><b>Definition</b> csv_matrix.h:42</div></div>
 <div class="ttc" id="aclassCsv_1_1Parser_html_a955b3fc146b97460a9f3c8d7a4ce036f"><div class="ttname"><a href="classCsv_1_1Parser.html#a955b3fc146b97460a9f3c8d7a4ce036f">Csv::Parser::parseToVectorRowMajor</a></div><div class="ttdeci">constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector &amp;values) const</div><div class="ttdoc">Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ....</div><div class="ttdef"><b>Definition</b> csv_parser.h:527</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md8"></a>
-Compile-Time Parsing Into 2D &lt;tt&gt;std::array&lt;/tt&gt;</h2>
+Compile-Time Parsing Into 2D std::array</h2>
 <p>Currently, parsing at compile-time has some restrictions:</p><ul>
 <li>To collapse consecutive double-quotes in strings, a compile-time-allocated buffer has to be used.</li>
 <li>By default, only string_views are supported for output (no numeric types).<ul>
