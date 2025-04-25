@@ -116,7 +116,7 @@ std::cout << "Row 1, column 2: " << matrix_data[info.matrixIndex(1, 2)] << std::
 return EXIT_SUCCESS;
 ```
 
-### Compile-Time Parsing Into 2D `std::array`
+### Compile-Time Parsing Into 2D std::array
 
 Currently, parsing at compile-time has some restrictions:
 - To collapse consecutive double-quotes in strings, a compile-time-allocated buffer has to be used.

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 project(csv-parser
-	VERSION 1.0.1
+	VERSION 1.1.0
 	DESCRIPTION "Csv::Parser (csv-parser)"
 	LANGUAGES CXX
 )
