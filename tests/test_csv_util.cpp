@@ -88,15 +88,17 @@ TEST_CASE("CsvUtilities", "[csv][util]")
 
 
 	SECTION("readNumberNoLocale() performs as expected") {
-		// Most of these tests are done in parser test above.
-		REQUIRE_FALSE(Csv::readNumberNoLocale<double>(""sv).has_value());
-		REQUIRE_FALSE(Csv::readNumberNoLocale<double>("a5"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumberNoLocale<double>("5a"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumberNoLocale<double>("5 a"sv).has_value());
-		REQUIRE(Csv::readNumberNoLocale<double>("1"sv) == 1.);
-		REQUIRE(Csv::readNumberNoLocale<double>("-5e+6"sv) == -5e+6);
-		REQUIRE(Csv::readNumberNoLocale<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
-		REQUIRE(std::isnan(Csv::readNumberNoLocale<double>("nan"sv).value()));
+		// When using libc++, std::from_chars supports floating point starting from v20.
+		#if !defined _LIBCPP_VERSION || _LIBCPP_VERSION > 200000
+			REQUIRE_FALSE(Csv::readNumberNoLocale<double>(""sv).has_value());
+			REQUIRE_FALSE(Csv::readNumberNoLocale<double>("a5"sv).has_value());
+			REQUIRE_FALSE(Csv::readNumberNoLocale<double>("5a"sv).has_value());
+			REQUIRE_FALSE(Csv::readNumberNoLocale<double>("5 a"sv).has_value());
+			REQUIRE(Csv::readNumberNoLocale<double>("1"sv) == 1.);
+			REQUIRE(Csv::readNumberNoLocale<double>("-5e+6"sv) == -5e+6);
+			REQUIRE(Csv::readNumberNoLocale<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
+			REQUIRE(std::isnan(Csv::readNumberNoLocale<double>("nan"sv).value()));
+		#endif
 
 		REQUIRE_FALSE(Csv::readNumberNoLocale<int>(""sv).has_value());
 		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("a5"sv).has_value());
