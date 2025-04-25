@@ -5,8 +5,10 @@ project(csv-parser
 	LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+# Set the C++ standard to C++23 if available.
+# Generally, we require at least C++17, but C++23 is preferred.
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED FALSE)
 
 
 add_library(compiler_warnings INTERFACE)
@@ -25,6 +27,7 @@ target_sources(csv_parser
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_error.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_matrix.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_parser.h
+		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_policies.h
 		${CMAKE_CURRENT_SOURCE_DIR}/csv_parser/csv_util.h
 )
 target_include_directories(csv_parser

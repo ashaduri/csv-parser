@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 - 2023 Alexander Shaduri
+Copyright: (C) 2021 - 2025 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -10,6 +10,7 @@ License: Zlib
 #include "csv_error.h"
 #include "csv_matrix.h"
 #include "csv_util.h"
+#include "csv_policies.h"
 
 #include <string>
 #include <string_view>
@@ -24,7 +25,6 @@ License: Zlib
 
 
 namespace Csv {
-
 
 
 /**
@@ -66,15 +66,12 @@ namespace Csv {
  * - getOriginalStringView() methods may return escaped double-quotes; string_views are read-only, and we
  * cannot touch the original CSV data; use getCleanString() methods if you need unescaped data.
  */
+template<typename BehaviorPolicy = LocaleAwareBehaviorPolicy>
 class Parser {
 	public:
 
-		/// If set to true, empty cell type is a separate type from (empty) string.
-		/// Default: true.
-		inline constexpr void useEmptyCellType(bool use_empty_cell_type);
-
-		/// Check whether an empty cell type is a separate type from (empty) string.
-		[[nodiscard]] inline constexpr bool useEmptyCellType() const;
+		/// Constructor
+		constexpr Parser() = default;
 
 
 		/// Parse CSV string data and store the results using a callback function.
@@ -260,15 +257,11 @@ class Parser {
 		constexpr void store(StoreCellFunction storeCellFunc,
 				const ParserState& state, CellTypeHint type_hint) const
 		{
-			if (type_hint == CellTypeHint::Empty && !use_empty_cell_type_) {
+			if (type_hint == CellTypeHint::Empty && !BehaviorPolicy::useEmptyCellType()) {
 				type_hint = CellTypeHint::StringWithoutEscapedQuotes;
 			}
 			storeCellFunc(state.current_row, state.current_column, state.current_value, type_hint);
 		}
-
-
-		/// If set to true, empty cell type is a separate type from (empty) string.
-		bool use_empty_cell_type_ = true;
 
 };
 
@@ -279,22 +272,9 @@ class Parser {
 
 
 
-constexpr void Parser::useEmptyCellType(bool use_empty_cell_type)
-{
-	use_empty_cell_type_ = use_empty_cell_type;
-}
-
-
-
-constexpr bool Parser::useEmptyCellType() const
-{
-	return use_empty_cell_type_;
-}
-
-
-
-template <typename StoreCellFunction>
-constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCellFunc) const
+template<typename BehaviorPolicy>
+template<typename StoreCellFunction>
+constexpr void Parser<BehaviorPolicy>::parse(std::string_view data, StoreCellFunction storeCellFunc) const
 {
 	ParserState state;
 
@@ -499,8 +479,9 @@ constexpr void Parser::parse(std::string_view data, StoreCellFunction storeCellF
 
 
 
+template<typename BehaviorPolicy>
 template<typename Vector2D>
-constexpr void Parser::parseTo2DVector(std::string_view data, Vector2D& values) const
+constexpr void Parser<BehaviorPolicy>::parseTo2DVector(std::string_view data, Vector2D& values) const
 {
 	Vector2D parsed_values;
 	parse(data,
@@ -512,7 +493,8 @@ constexpr void Parser::parseTo2DVector(std::string_view data, Vector2D& values) 
 			if (parsed_values[column].size() < (row + 1)) {
 				parsed_values[column].resize(row + 1);
 			}
-			parsed_values[column][row] = CellTrait<typename Vector2D::value_type::value_type>::create(cell_data, hint);
+			parsed_values[column][row] =
+					BehaviorPolicy::template create<typename Vector2D::value_type::value_type>(cell_data, hint);
 		}
 	);
 	std::swap(values, parsed_values);
@@ -520,8 +502,9 @@ constexpr void Parser::parseTo2DVector(std::string_view data, Vector2D& values) 
 
 
 
+template<typename BehaviorPolicy>
 template<std::size_t rows, std::size_t columns, typename Cell>
-constexpr auto Parser::parseTo2DArray(std::string_view data) const
+constexpr auto Parser<BehaviorPolicy>::parseTo2DArray(std::string_view data) const
 {
 	std::array<std::array<Cell, rows>, columns> matrix;
 
@@ -530,7 +513,7 @@ constexpr auto Parser::parseTo2DArray(std::string_view data) const
 				std::string_view cell_data, Csv::CellTypeHint hint)
 				constexpr
 		{
-			matrix[column][row] = CellTrait<Cell>::create(cell_data, hint);
+			matrix[column][row] = BehaviorPolicy::template create<Cell>(cell_data, hint);
 		}
 	);
 
@@ -539,16 +522,18 @@ constexpr auto Parser::parseTo2DArray(std::string_view data) const
 
 
 
+template<typename BehaviorPolicy>
 template<typename Vector>
-constexpr MatrixInformation Parser::parseToVectorRowMajor(std::string_view data, Vector& values) const
+constexpr MatrixInformation Parser<BehaviorPolicy>::parseToVectorRowMajor(std::string_view data, Vector& values) const
 {
 	return parseToVectorRowMajor(data, values, std::nullopt, std::nullopt);
 }
 
 
 
+template<typename BehaviorPolicy>
 template<typename Vector>
-constexpr MatrixInformation Parser::parseToVectorRowMajor(std::string_view data, Vector& values,
+constexpr MatrixInformation Parser<BehaviorPolicy>::parseToVectorRowMajor(std::string_view data, Vector& values,
 		std::optional<std::size_t> rows_hint, std::optional<std::size_t> columns) const
 {
 	Vector parsed_values;
@@ -588,7 +573,7 @@ constexpr MatrixInformation Parser::parseToVectorRowMajor(std::string_view data,
 				}
 			}
 			parsed_values[info.matrixIndex(row, column)] =
-					CellTrait<typename Vector::value_type>::create(cell_data, hint);
+					BehaviorPolicy::template create<typename Vector::value_type>(cell_data, hint);
 		}
 	);
 	std::swap(values, parsed_values);
@@ -606,8 +591,9 @@ constexpr MatrixInformation Parser::parseToVectorRowMajor(std::string_view data,
 
 
 
+template<typename BehaviorPolicy>
 template<typename Vector>
-constexpr MatrixInformation Parser::parseToVectorColumnMajor(std::string_view data, Vector& values,
+constexpr MatrixInformation Parser<BehaviorPolicy>::parseToVectorColumnMajor(std::string_view data, Vector& values,
 		std::size_t rows, std::optional<std::size_t> columns_hint) const
 {
 	Vector parsed_values;
@@ -626,7 +612,7 @@ constexpr MatrixInformation Parser::parseToVectorColumnMajor(std::string_view da
 				parsed_values.resize((column + 1) * rows);
 			}
 			parsed_values[info.matrixIndex(row, column)] =
-					CellTrait<typename Vector::value_type>::create(cell_data, hint);
+					BehaviorPolicy::template create<typename Vector::value_type>(cell_data, hint);
 		}
 	);
 	std::swap(values, parsed_values);
@@ -644,8 +630,9 @@ constexpr MatrixInformation Parser::parseToVectorColumnMajor(std::string_view da
 
 
 
+template<typename BehaviorPolicy>
 template<std::size_t rows, std::size_t columns, typename Cell>
-constexpr auto Parser::parseToArray(std::string_view data, MatrixOrder order) const
+constexpr auto Parser<BehaviorPolicy>::parseToArray(std::string_view data, MatrixOrder order) const
 {
 	std::array<Cell, rows * columns> matrix;
 
@@ -655,7 +642,7 @@ constexpr auto Parser::parseToArray(std::string_view data, MatrixOrder order) co
 				constexpr
 		{
 			matrix[MatrixInformation::matrixIndex(row, column, rows, columns, order)] =
-					CellTrait<Cell>::create(cell_data, hint);
+					BehaviorPolicy::template create<Cell>(cell_data, hint);
 		}
 	);
 

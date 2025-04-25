@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright (C) 2021 Alexander Shaduri
+Copyright (C) 2021 - 2025 Alexander Shaduri
 License: 0BSD (Zero-Clause BSD)
 ***************************************************************************/
 
@@ -30,7 +30,7 @@ NaN, -Inf
 	static_assert(matrix[0][0].getOriginalStringView() == "abc"sv);
 	static_assert(matrix[1][0].getOriginalStringView() == "5"sv);
 	static_assert(matrix[0][1].getOriginalStringView().empty());
-	static_assert(matrix[1][1].getCleanStringBuffer<R"(with ""quote inside)"sv.size()>().getStringView()
+	static_assert(matrix[1][1].getCleanStringBuffer<R"(with "quote inside)"sv.size()>().getStringView()
 			== R"(with "quote inside)"sv);
 	static_assert(matrix[0][2].getOriginalStringView() == "NaN"sv);
 	static_assert(matrix[1][2].getOriginalStringView() == " -Inf"sv);

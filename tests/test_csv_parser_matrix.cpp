@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 - 2023 Alexander Shaduri
+Copyright: (C) 2021 - 2025 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -406,7 +406,7 @@ R"(abc, "def"
 		constexpr auto matrix = parser.parseToArray<3, 2>(data, Csv::MatrixOrder::ColumnMajor);
 
 		static_assert(matrix[0].getOriginalStringView() == "abc"sv);
-		static_assert(matrix[1].getOriginalStringView() == ""sv);
+		static_assert(matrix[1].getOriginalStringView().empty());
 		static_assert(matrix[2].getOriginalStringView() == "R31"sv);
 		static_assert(matrix[3].getOriginalStringView() == "def"sv);
 		static_assert(matrix[4].getOriginalStringView() == "5"sv);
@@ -428,13 +428,62 @@ R"(abc, "def"
 
 		static_assert(matrix[0].getOriginalStringView() == "abc"sv);
 		static_assert(matrix[1].getOriginalStringView() == "def"sv);
-		static_assert(matrix[2].getOriginalStringView() == ""sv);
+		static_assert(matrix[2].getOriginalStringView().empty());
 		static_assert(matrix[3].getOriginalStringView() == "5"sv);
 		static_assert(matrix[4].getOriginalStringView() == "R31"sv);
 		static_assert(matrix[5].getOriginalStringView() == "6"sv);
 
 		static_assert(matrix.size() == 6);
 	}
+
+
+
+	// Compile-time parsing of integers requires C++23.
+#if __cplusplus >= 202300L
+
+	SECTION("supports constexpr integral flat matrix, row major") {
+		constexpr std::string_view data =
+R"(11, -12
+21.,inf
+,3.2e1)";
+
+		constexpr Csv::Parser<Csv::LocaleUnawareBehaviorPolicy> parser;
+
+		SECTION("matrix of ints") {
+			constexpr auto matrix = parser.parseToArray<3, 2, int>(data, Csv::MatrixOrder::RowMajor);
+
+			static_assert(matrix.size() == 3 * 2);
+			static_assert(matrix[0] == 11);
+			static_assert(matrix[1] == -12);
+			static_assert(matrix[2] == 0);  // double cannot be parsed as int
+			static_assert(matrix[3] == 0);
+			static_assert(matrix[4] == 0);
+			static_assert(matrix[5] == 0);  // double cannot be parsed as int
+		}
+	}
+
+
+	SECTION("can parse to numeric integral flat matrix, column major") {
+		constexpr std::string_view data =
+R"(11, -12
+21.,inf
+,3.2e1)";
+
+		constexpr Csv::Parser<Csv::LocaleUnawareBehaviorPolicy> parser;
+
+		SECTION("matrix of ints") {
+			constexpr auto matrix = parser.parseToArray<3, 2, int>(data, Csv::MatrixOrder::ColumnMajor);
+
+			static_assert(matrix.size() == 3 * 2);
+			static_assert(matrix[0] == 11);
+			static_assert(matrix[1] == 0);
+			static_assert(matrix[2] == 0);
+			static_assert(matrix[3] == -12);
+			static_assert(matrix[4] == 0);
+			static_assert(matrix[5] == 0);
+		}
+	}
+#endif
 
 }
 

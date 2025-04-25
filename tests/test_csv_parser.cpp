@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 - 2023 Alexander Shaduri
+Copyright: (C) 2021 - 2025 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -37,6 +37,15 @@ Csv::CellReference parseSingleValue(std::string_view data)
 
 
 
+/// Policy which disables empty cell type
+struct NoEmptyCellPolicy : public Csv::LocaleAwareBehaviorPolicy {
+	[[nodiscard]] static constexpr bool useEmptyCellType() noexcept
+	{
+		return false;
+	}
+};
+
+
 
 TEST_CASE("CsvParser", "[csv][parser]")
 {
@@ -62,9 +71,7 @@ TEST_CASE("CsvParser", "[csv][parser]")
 
 	SECTION("can parse empty values as Strings") {
 		std::vector<std::vector<Csv::CellReference>> cell_refs;
-		Csv::Parser parser;
-		parser.useEmptyCellType(false);  // disable Empty type support
-		REQUIRE(parser.useEmptyCellType() == false);
+		Csv::Parser<NoEmptyCellPolicy> parser;
 		REQUIRE_NOTHROW(parser.parseTo2DVector(","sv, cell_refs));
 		REQUIRE(cell_refs.size() == 2);
 		REQUIRE(cell_refs.at(0).size() == 1);

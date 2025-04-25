@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 - 2023 Alexander Shaduri
+Copyright: (C) 2021 - 2025 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -10,6 +10,7 @@ License: Zlib
 #include <string>
 #include <optional>
 #include <algorithm>
+#include <charconv>
 
 
 /**
@@ -51,7 +52,21 @@ inline constexpr std::size_t getCleanStringSize(std::string_view uncollapsed_vie
 /// \param cell String data to parse, with optional whitespace on one or both sides.
 /// \return Parsed number or `std::nullopt` if parsing failed.
 template<typename Number>
-std::optional<Number> readNumber(std::string_view cell);
+std::optional<Number> readNumberLocale(std::string_view cell);
+
+
+/// Try to read a numeric value from string data.
+/// Unless the string data completely represents a serialized int/float/double/..., `std::nullopt` is returned.
+/// \note This function is locale-independent.
+/// \note This function is constexpr in C++23+ when parsing integral types.
+/// \tparam Number Type of number to read, e.g. int, float, double, etc.
+/// \param cell String data to parse, with optional whitespace on one or both sides.
+/// \return Parsed number or `std::nullopt` if parsing failed.
+template<typename Number>
+#if __cplusplus >= 202300L
+constexpr
+#endif
+std::optional<Number> readNumberNoLocale(std::string_view cell);
 
 
 /// A helper function to get an element of a 2D vector in less error-prone way.
@@ -103,7 +118,7 @@ constexpr std::size_t getCleanStringSize(std::string_view uncollapsed_view)
 
 
 template<typename Number>
-std::optional<Number> readNumber(std::string_view cell)
+std::optional<Number> readNumberLocale(std::string_view cell)
 {
 	// Trim right whitespace (left whitespace is ignored by stod()).
 	std::size_t size = cell.size();
@@ -118,8 +133,7 @@ std::optional<Number> readNumber(std::string_view cell)
 	});
 
 	std::optional<Number> numeric_value;
-	// As of 2020, from_chars() is broken for floats/doubles in most compilers, so we'll have to do with stod()/... for
-	// now, even if it means using current locale instead of C locale.
+	// Use locale-aware conversion functions to parse the number.
 	// While calling std::strtod() could be potentially faster, it also means we have to deal with some
 	// platform-specific errno and other peculiarities. std::stod() wraps that nicely.
 	try {
@@ -157,6 +171,36 @@ std::optional<Number> readNumber(std::string_view cell)
 		// nothing
 	}
 	return numeric_value;
+}
+
+
+
+template<typename Number>
+#if __cplusplus >= 202300L
+constexpr
+#endif
+std::optional<Number> readNumberNoLocale(std::string_view cell)
+{
+	// Trim right and left whitespace
+	cell.remove_prefix(std::min(cell.find_first_not_of(" \t"), cell.size()));
+	cell.remove_suffix(std::min(cell.size() - cell.find_last_not_of(" \t") - 1, cell.size()));
+
+	// string can be used in constexpr functions since C++23
+	std::string s(cell);
+
+	// Convert to lowercase (needed for Matlab-produced CSV files)
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+		return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;  // tolower is not constexpr
+	});
+
+	Number parsed_value = 0;
+
+	// from_chars is constexpr since C++23, but only for integers
+	auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), parsed_value);
+	if (ec == std::errc() && ptr == (s.data() + s.size())) {
+		return parsed_value;
+	}
+	return std::nullopt;
 }
 
 

@@ -1,10 +1,13 @@
 /**************************************************************************
-Copyright: (C) 2021 - 2023 Alexander Shaduri
+Copyright: (C) 2021 - 2025 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
 #ifndef CSV_CELL_H
 #define CSV_CELL_H
+
+#include "csv_util.h"
+#include "csv_cell_string_buffer.h"
 
 #include <string_view>
 #include <string>
@@ -15,11 +18,9 @@ License: Zlib
 #include <stdexcept>
 #include <array>
 
-#include "csv_util.h"
-
 /**
  * \file
- * Cell-related classes.
+ * Various Cell-related classes.
  */
 
 
@@ -45,75 +46,39 @@ enum class CellType {
 
 
 
-/// A helper class for compile-time buffer construction and string unescaping.
-/// \tparam Size Buffer size (number of characters without any terminating null).
-template<std::size_t Size>
-class CellStringBuffer {
-	public:
-
-		/// Constructor. Copies the cleaned-up cell data into the buffer.
-		/// \param cell Cell data to clean up and copy into the buffer.
-		/// \param has_escaped_quotes If true, the data in cell is cleaned up (unescaped)
-		/// before being copied into the buffer.
-		/// \throw std::out_of_range if the buffer is too small to hold the cleaned-up string.
-		constexpr inline explicit CellStringBuffer(std::string_view cell, bool has_escaped_quotes);
-
-		/// Return a string view to the stored data.
-		[[nodiscard]] constexpr std::string_view getStringView() const;
-
-		/// Return buffer size, as determined by the template parameter.
-		[[nodiscard]] constexpr std::size_t getBufferSize() const noexcept;
-
-
-	private:
-
-		struct Buffer {
-			std::array<char, Size> buffer = { };
-			std::size_t size = 0;
-		};
-
-		/// Create a buffer object, with optionally cleaned-up input in it.
-		/// \throw std::out_of_range if the buffer is too small to hold the cleaned-up string.
-		[[nodiscard]] constexpr static Buffer prepareBuffer(std::string_view input, bool has_escaped_quotes);
-
-		/// Unescape a string view to newly created buffer
-		[[nodiscard]] constexpr static Buffer cleanString(std::string_view input);
-
-		Buffer buffer_;
-};
-
-
-
 /// Data inside a single cell, potentially stored as a reference to the original data.
 /// If the cell type is CellType::String, this object references the data in original CSV text.
 class CellReference {
 	public:
 
 		/// Constructor, creates an Empty value.
-		CellReference() = default;
+		constexpr CellReference() = default;
 
 		/// Constructor, which stores a copy or a reference to the original the cell data.
 		/// \param cell Cell data to store or reference.
 		/// \param hint Type hint associated with the cell during parsing.
-		inline CellReference(std::string_view cell, CellTypeHint hint);
+		/// \param policy Argument used for type inference.
+		/// \tparam BehaviorPolicy Policy to use for parsing, same as BehaviorPolicy in Parser.
+		template<typename BehaviorPolicy>
+		constexpr CellReference(std::string_view cell, CellTypeHint hint, BehaviorPolicy policy) noexcept;
 
 		/// Get data type
-		[[nodiscard]] inline CellType getType() const;
+		[[nodiscard]] inline constexpr CellType getType() const;
 
 		/// Check whether the data is of CellType::Empty type.
-		[[nodiscard]] inline bool isEmpty() const;
+		[[nodiscard]] inline constexpr bool isEmpty() const;
 
 		/// Get the cell value as a double.
 		/// This succeeds only if cell type is CellType::Double.
 		/// \return `std::nullopt` on type mismatch.
-		[[nodiscard]] inline std::optional<double> getDouble() const;
+		[[nodiscard]] inline constexpr std::optional<double> getDouble() const;
 
 		/// Get stored data reference as string_view to the original CSV data.
 		/// This succeeds only if cell type is CellType::String.
 		/// \param[out] has_escaped_quotes This cell may contain escaped consecutive double-quotes inside;
 		/// if has_escaped_quotes is not `std::nullptr`, *has_escaped_quotes will reflect that.
 		/// \return `std::nullopt` on type mismatch.
-		[[nodiscard]] inline std::optional<std::string_view> getOriginalStringView(
+		[[nodiscard]] inline constexpr std::optional<std::string_view> getOriginalStringView(
 				bool* has_escaped_quotes = nullptr) const;
 
 		/// Get stored cell data as `std::string`.
@@ -121,6 +86,20 @@ class CellReference {
 		/// The string has collapsed consecutive double-quotes inside.
 		/// \return `std::nullopt` on type mismatch.
 		[[nodiscard]] inline std::optional<std::string> getCleanString() const;
+
+		/// Get a string buffer with collapsed consecutive double-quotes.
+		/// This function is useful in constexpr context to retrieve unescaped cell data.
+		/// \tparam BufferSize buffer size has to be at least `getOriginalStringView().size()`. Note
+		/// that buffer size is always checked, regardless of whether quotes had to be escaped or not.
+		/// Reserving additional character for terminating null is not required.
+		/// \return invalid buffer if BufferSize is too small.
+		template<std::size_t BufferSize>
+		[[nodiscard]] constexpr CellStringBuffer<BufferSize> getCleanStringBuffer() const;
+
+		/// Get required buffer size to use as getCleanStringBuffer()'s template argument.
+		/// This function is useful in constexpr context.
+		[[nodiscard]] constexpr std::size_t getRequiredBufferSize() const;
+
 
 	private:
 
@@ -154,7 +133,10 @@ class CellValue {
 		/// Constructor, which stores a copy of the cell data.
 		/// \param cell Cell data to store.
 		/// \param hint Type hint associated with the cell during parsing.
-		inline CellValue(std::string_view cell, CellTypeHint hint);
+		/// \param policy Argument used for type inference.
+		/// \tparam BehaviorPolicy Policy to use for parsing, same as BehaviorPolicy in Parser.
+		template<typename BehaviorPolicy>
+		CellValue(std::string_view cell, CellTypeHint hint, BehaviorPolicy policy);
 
 		/// Get cell type
 		[[nodiscard]] inline CellType getType() const;
@@ -196,18 +178,21 @@ class CellDoubleValue {
 	public:
 
 		/// Constructor, setting the value to `std::numeric_limits<double>::quiet_NaN()`.
-		CellDoubleValue() = default;
+		constexpr CellDoubleValue() = default;
 
 		/// Constructor, which stores a copy of the cell data.
 		/// If conversion failure occurs, NaN is assumed.
 		/// \param cell Cell data to store.
 		/// \param hint_ignored This parameter is ignored and is present for compatibility with CellTrait::create().
-		inline explicit CellDoubleValue(std::string_view cell,
-				CellTypeHint hint_ignored = CellTypeHint::UnquotedData);
+		/// \param policy Argument used for type inference.
+		/// \tparam BehaviorPolicy Policy to use for parsing, same as BehaviorPolicy in Parser.
+		template<typename BehaviorPolicy>
+		constexpr explicit CellDoubleValue(std::string_view cell,
+				CellTypeHint hint_ignored, BehaviorPolicy policy) noexcept;
 
 		/// Get the cell value if cell type is Double.
 		/// \return `std::numeric_limits<double>::quiet_NaN()` on error.
-		[[nodiscard]] inline double getValue() const;
+		[[nodiscard]] inline constexpr double getValue() const;
 
 	private:
 		/// Stored data
@@ -230,7 +215,10 @@ class CellStringReference {
 		/// Constructor, which stores a reference to the original cell data.
 		/// \param cell Cell data to reference.
 		/// \param hint Type hint associated with the cell during parsing.
-		inline constexpr CellStringReference(std::string_view cell, CellTypeHint hint) noexcept;
+		/// \param policy Argument used for type inference.
+		/// \tparam BehaviorPolicy Policy to use for parsing, same as BehaviorPolicy in Parser.
+		template<typename BehaviorPolicy>
+		constexpr CellStringReference(std::string_view cell, CellTypeHint hint, BehaviorPolicy policy) noexcept;
 
 		/// Get stored cell reference as string_view.
 		/// Cell type is assumed to be CellType::String, regardless of auto-detected type.
@@ -283,7 +271,10 @@ class CellStringValue {
 		/// Constructor, which stores a copy of the cell data.
 		/// \param cell Cell data to store.
 		/// \param hint Type hint associated with the cell during parsing.
-		inline CellStringValue(std::string_view cell, CellTypeHint hint);
+		/// \param policy Argument used for type inference.
+		/// \tparam BehaviorPolicy Policy to use for parsing, same as BehaviorPolicy in Parser.
+		template<typename BehaviorPolicy>
+		CellStringValue(std::string_view cell, CellTypeHint hint, BehaviorPolicy policy);
 
 		/// Get stored cell reference as string.
 		/// Cell type is assumed to be String, regardless of autodetected type.
@@ -297,93 +288,14 @@ class CellStringValue {
 
 
 
-/// Parser::parse*() functions use this to create the an element of a container.
-/// By default, it handles Cell* classes (CellReference, etc.) and primitive numeric types (long int, double, etc.).
-/// This trait can be specialized for user-defined types.
-/// \tparam CellT Type of the cell object to create.
-template<typename CellT>
-class CellTrait {
-	public:
-
-		/// Create an object of type CellT from cell contents represented as string_view.
-		[[nodiscard]] static constexpr CellT create(std::string_view cell, CellTypeHint hint);
-};
-
-
-
 
 // ----- Implementation
 
 
 
-template<std::size_t Size>
-constexpr CellStringBuffer<Size>::CellStringBuffer(std::string_view cell, bool has_escaped_quotes)
-		: buffer_(prepareBuffer(cell, has_escaped_quotes))
-{ }
-
-
-
-template<std::size_t Size>
-constexpr std::string_view CellStringBuffer<Size>::getStringView() const
-{
-	return {buffer_.buffer.data(), buffer_.size};
-}
-
-
-
-template<std::size_t Size>
-constexpr std::size_t CellStringBuffer<Size>::getBufferSize() const noexcept
-{
-	return Size;
-}
-
-
-
-template<std::size_t Size>
-constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::prepareBuffer(
-		std::string_view input, bool has_escaped_quotes)
-{
-	if (has_escaped_quotes) {
-		// cleanString will throw if the buffer is too small
-		return cleanString(input);
-	}
-
-	if (Size < input.size()) {
-		throw std::out_of_range("Insufficient buffer size");
-	}
-	std::array<char, Size> buffer = { };
-	for (std::size_t pos = 0; pos < input.size(); ++pos) {
-		buffer[pos] = input[pos];
-	}
-	return Buffer{buffer, input.size()};
-}
-
-
-
-template<std::size_t Size>
-constexpr typename CellStringBuffer<Size>::Buffer CellStringBuffer<Size>::cleanString(std::string_view input)
-{
-	if (Size < getCleanStringSize(input)) {
-		throw std::out_of_range("Insufficient buffer size");
-	}
-	std::array<char, Size> buffer = { };
-	std::size_t output_pos = 0;
-	for (std::size_t input_pos = 0; input_pos < input.size(); ++input_pos) {
-		char c = input[input_pos];
-		buffer[output_pos] = c;
-		++output_pos;
-		if (c == '\"' && (input_pos + 1) < input.size() && input[input_pos + 1] == '\"') {
-			++input_pos;
-		}
-	}
-	return {buffer, output_pos};
-}
-
-
-
-
-
-CellReference::CellReference(std::string_view cell, CellTypeHint hint)
+template<typename BehaviorPolicy>
+constexpr CellReference::CellReference(std::string_view cell, CellTypeHint hint,
+		[[maybe_unused]] BehaviorPolicy policy) noexcept
 {
 	switch (hint) {
 		case CellTypeHint::Empty:
@@ -399,7 +311,7 @@ CellReference::CellReference(std::string_view cell, CellTypeHint hint)
 			break;
 
 		case CellTypeHint::UnquotedData:
-			if (auto double_value = readNumber<double>(cell); double_value.has_value()) {
+			if (auto double_value = BehaviorPolicy::template readNumber<double>(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
 				value_ = String{cell, false};
@@ -410,7 +322,7 @@ CellReference::CellReference(std::string_view cell, CellTypeHint hint)
 
 
 
-CellType CellReference::getType() const
+constexpr CellType CellReference::getType() const
 {
 	if (std::holds_alternative<Empty>(value_)) {
 		return CellType::Empty;
@@ -426,14 +338,14 @@ CellType CellReference::getType() const
 
 
 
-bool CellReference::isEmpty() const
+constexpr bool CellReference::isEmpty() const
 {
 	return std::holds_alternative<Empty>(value_);
 }
 
 
 
-std::optional<double> CellReference::getDouble() const
+constexpr std::optional<double> CellReference::getDouble() const
 {
 	if (std::holds_alternative<double>(value_)) {
 		return std::get<double>(value_);
@@ -443,7 +355,7 @@ std::optional<double> CellReference::getDouble() const
 
 
 
-std::optional<std::string_view> CellReference::getOriginalStringView(bool* has_escaped_quotes) const
+constexpr std::optional<std::string_view> CellReference::getOriginalStringView(bool* has_escaped_quotes) const
 {
 	if (std::holds_alternative<String>(value_)) {
 		const auto& s = std::get<String>(value_);
@@ -468,9 +380,29 @@ std::optional<std::string> CellReference::getCleanString() const
 
 
 
+template<std::size_t BufferSize>
+constexpr CellStringBuffer<BufferSize> CellReference::getCleanStringBuffer() const
+{
+	// This throws bad variant access
+	const auto& s = std::get<String>(value_);
+	return CellStringBuffer<BufferSize>(s.view, s.has_escaped_quotes);
+}
 
 
-CellValue::CellValue(std::string_view cell, CellTypeHint hint)
+
+constexpr std::size_t CellReference::getRequiredBufferSize() const
+{
+	// This throws bad variant access
+	const auto& s = std::get<String>(value_);
+	return s.has_escaped_quotes ? getCleanStringSize(s.view) : s.view.size();
+}
+
+
+
+
+
+template<typename BehaviorPolicy>
+CellValue::CellValue(std::string_view cell, CellTypeHint hint, [[maybe_unused]] BehaviorPolicy policy)
 {
 	switch (hint) {
 		case CellTypeHint::Empty:
@@ -486,7 +418,7 @@ CellValue::CellValue(std::string_view cell, CellTypeHint hint)
 			break;
 
 		case CellTypeHint::UnquotedData:
-			if (auto double_value = readNumber<double>(cell); double_value.has_value()) {
+			if (auto double_value = BehaviorPolicy::template readNumber<double>(cell); double_value.has_value()) {
 				value_ = double_value.value();
 			} else {
 				value_ = std::string(cell);
@@ -542,17 +474,18 @@ std::optional<std::string> CellValue::getString() const
 
 
 
-CellDoubleValue::CellDoubleValue(std::string_view cell,
-		[[maybe_unused]] CellTypeHint hint_ignored)
+template<typename BehaviorPolicy>
+constexpr CellDoubleValue::CellDoubleValue(std::string_view cell,
+		[[maybe_unused]] CellTypeHint hint_ignored, [[maybe_unused]] BehaviorPolicy policy) noexcept
 {
-	if (auto double_value = readNumber<double>(cell); double_value.has_value()) {
+	if (auto double_value = BehaviorPolicy::template readNumber<double>(cell); double_value.has_value()) {
 		value_ = double_value.value();
 	}
 }
 
 
 
-double CellDoubleValue::getValue() const
+constexpr double CellDoubleValue::getValue() const
 {
 	return value_;
 }
@@ -561,7 +494,9 @@ double CellDoubleValue::getValue() const
 
 
 
-constexpr CellStringReference::CellStringReference(std::string_view cell, CellTypeHint hint) noexcept
+template<typename BehaviorPolicy>
+constexpr CellStringReference::CellStringReference(std::string_view cell, CellTypeHint hint,
+		[[maybe_unused]] BehaviorPolicy policy) noexcept
 		: value_(cell),
 		has_escaped_quotes_(hint == CellTypeHint::StringWithEscapedQuotes)
 { }
@@ -602,7 +537,9 @@ constexpr std::size_t CellStringReference::getRequiredBufferSize() const
 
 
 
-CellStringValue::CellStringValue(std::string_view cell, CellTypeHint hint)
+template<typename BehaviorPolicy>
+CellStringValue::CellStringValue(std::string_view cell, CellTypeHint hint,
+		[[maybe_unused]] BehaviorPolicy policy)
 		: value_(hint == CellTypeHint::StringWithEscapedQuotes ? cleanString(cell) : std::string(cell))
 { }
 
@@ -613,29 +550,6 @@ const std::string& CellStringValue::getString() const
 	return value_;
 }
 
-
-
-
-
-template<typename CellT>
-constexpr CellT CellTrait<CellT>::create(std::string_view cell, CellTypeHint hint)
-{
-	// The types here are the same as in readNumber()
-	if constexpr(std::is_same_v<CellT, float>
-			|| std::is_same_v<CellT, double>
-			|| std::is_same_v<CellT, long double>) {
-		return readNumber<CellT>(cell).value_or(std::numeric_limits<CellT>::quiet_NaN());
-	} else if constexpr(std::is_same_v<CellT, int>
-			|| std::is_same_v<CellT, long int>
-			|| std::is_same_v<CellT, long long int>
-			|| std::is_same_v<CellT, unsigned long int>
-			|| std::is_same_v<CellT, unsigned long long int>) {
-		return readNumber<CellT>(cell).value_or(0);
-	} else {
-		// Cell* classes
-		return CellT(cell, hint);
-	}
-}
 
 
 

@@ -1,19 +1,21 @@
 # Csv::Parser (csv-parser)
-***Compile-time and runtime CSV parser written in C++17***
+***Compile-time and runtime CSV parser written in Modern C++***
 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ashaduri/csv-parser?label=Version)](https://github.com/ashaduri/csv-parser)
 ![GitHub](https://img.shields.io/github/license/ashaduri/csv-parser)
-![Language](https://img.shields.io/badge/language-ISO%20C++17-blue)
+![Language](https://img.shields.io/badge/language-Modern%20C++-blue)
 
 
 ## Features
 - Header-only.
-- Requires only standard C++ (C++17).
-- Supports reading CSV data from `std::string_view` during compilation (using `constexpr`).
+- Requires only standard C++ (minimum C++17, with C++23 support providing additional functionality).
+- Supports reading CSV data from `std::string_view` at compile-time.
 - Fully supports [RFC 4180](https://www.ietf.org/rfc/rfc4180.txt), including quoted values, escaped quotes, and newlines in field values.
 - Liberal in terms of accepting not-quite-standard CSV files, but detects errors when needed.
 - Supports Excel CSV variations.
-- Supports reading data as different types (string, double, empty field) (runtime only).
+- Supports reading data as different types (string, double, empty field), with some restrictions when parsing at 
+  compile-time.
+- Modular design allows for easy extension of the library.
 - Extensively tested using [Catch2](https://github.com/catchorg/Catch2).
 
 ## API Reference
@@ -114,11 +116,14 @@ std::cout << "Row 1, column 2: " << matrix_data[info.matrixIndex(1, 2)] << std::
 return EXIT_SUCCESS;
 ```
 
-### Compile-Time Parsing
+### Compile-Time Parsing Into 2D `std::array`
 
 Currently, parsing at compile-time has some restrictions:
-- Only string_views are supported for output (no doubles).
 - To collapse consecutive double-quotes in strings, a compile-time-allocated buffer has to be used.
+- By default, only string_views are supported for output (no numeric types).
+  - If using C++23 or later, integral types are supported as well.
+  - If compile-time parsing of floating point numbers is needed,
+    [fast_float](https://github.com/fastfloat/fast_float) can be plugged in.
 
 One (possibly useful) consequence of compile-time parsing is that a parse error also causes a compilation error. 
 
@@ -130,11 +135,10 @@ One (possibly useful) consequence of compile-time parsing is that a parse error 
 
 using namespace std::string_view_literals;
 
+constexpr std::size_t columns = 2, rows = 2;
 constexpr std::string_view data =
 R"(abc, "def"
 "with ""quote inside",6)";
-
-constexpr std::size_t columns = 2, rows = 2;
 
 constexpr Csv::Parser parser;
 
@@ -156,6 +160,103 @@ static_assert(matrix[1][1].getOriginalStringView() == "6"sv);
 constexpr auto buffer_size = matrix[0][1].getRequiredBufferSize();  // collapsed size
 constexpr auto buffer = matrix[0][1].getCleanStringBuffer<buffer_size>();
 static_assert(buffer.getStringView() == R"(with "quote inside)"sv);
+```
+
+### Compile-Time Parsing of Integral Matrix Into 1D Vector
+
+The library can be used to parse CSV data at compile-time into a 1D vector, in row-major
+or column-major order.
+Additionally, compile-time parsing of integral types is supported since C++23.
+
+#### Example:
+```cpp
+#include "csv_parser.h"
+
+// ...
+
+using namespace std::string_view_literals;
+
+constexpr std::size_t columns = 2, rows = 3;
+constexpr std::string_view data =
+R"(11, -12
+21, 4
+60, -10)";
+
+// Use Csv::LocaleUnawareBehaviorPolicy to avoid locale issues and allow compile-time integer parsing.
+constexpr Csv::Parser<Csv::LocaleUnawareBehaviorPolicy> parser;
+
+// Parse into std::array<CellStringReference, rows * columns> in row-major order
+{
+    constexpr auto matrix = parser.parseToArray<rows, columns>(data, Csv::MatrixOrder::RowMajor);
+
+    static_assert(matrix[0].getOriginalStringView() == "11"sv);
+    static_assert(matrix[2].getOriginalStringView() == "21"sv);
+}
+
+// Parse into std::array<std::int64_t, rows * columns> in column-major order.
+// Compile-time parsing to integers is supported since C++23.
+#if __cplusplus >= 202300L
+{
+    constexpr auto matrix = parser.parseToArray<rows, columns, std::int64_t>(data, Csv::MatrixOrder::ColumnMajor);
+
+    static_assert(matrix[0] == 11);
+    static_assert(matrix[2] == 60);
+}
+#endif
+```
+
+
+### Compile-Time Parsing of Numeric Matrix Using External Library for Floating Point Numbers
+
+A library like [fast_float](https://github.com/fastfloat/fast_float) can be used to parse floating point 
+numbers at compile-time. This is done by creating a custom policy that implements the `readNumber` and
+`create` methods.
+This approach also allows for improving the performance of parsing floating point numbers compared
+to the standard library.
+
+#### Example:
+```cpp
+#include "csv_parser.h"
+#include "fast_float/fast_float.h"
+
+// Custom policy which uses fast_float library for parsing to floating point.
+struct CustomPolicy : Csv::LocaleUnawareBehaviorPolicy {
+	template<typename Number>
+	static constexpr std::optional<Number> readNumber(std::string_view cell)
+	{
+		Number parsed_value = 0;
+		auto [ptr, ec] = fast_float::from_chars(cell.begin(), cell.end(), parsed_value);
+		if (ec == std::errc() && ptr == (cell.end())) {
+			return parsed_value;
+		}
+		return std::nullopt;
+	}
+
+	template<typename CellT>
+	static constexpr CellT create(std::string_view cell, Csv::CellTypeHint hint)
+	{
+		return readNumber<CellT>(cell).value_or(std::numeric_limits<CellT>::quiet_NaN());
+	}
+};
+
+
+void parse()
+{
+	constexpr std::string_view data =
+	R"(11.6, -12.3
+2e5, -inf
+nan, inf)";
+
+	// Use custom policy which uses fast_float library for parsing to floating point.
+	constexpr Csv::Parser<CustomPolicy> parser;
+	constexpr std::size_t columns = 2, rows = 3;
+
+	// Parse into std::array<double, rows * columns> in row-major order
+	constexpr auto matrix = parser.parseToArray<rows, columns, double>(data, Csv::MatrixOrder::RowMajor);
+
+	static_assert(matrix[0] == 11.6);
+	static_assert(matrix[3] == -std::numeric_limits<double>::infinity());
+}
 ```
 
 

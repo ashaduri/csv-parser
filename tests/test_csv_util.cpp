@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright: (C) 2021 - 2023 Alexander Shaduri
+Copyright: (C) 2021 - 2025 Alexander Shaduri
 License: Zlib
 ***************************************************************************/
 
@@ -47,25 +47,83 @@ TEST_CASE("CsvUtilities", "[csv][util]")
 	}
 
 
-	SECTION("readNumber() performs as expected") {
+	SECTION("readNumberLocale() performs as expected") {
 		// Most of these tests are done in parser test above.
-		REQUIRE_FALSE(Csv::readNumber<double>(""sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<double>("a5"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<double>("5a"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<double>("5 a"sv).has_value());
-		REQUIRE(Csv::readNumber<double>("1"sv) == 1.);
-		REQUIRE(Csv::readNumber<double>("-5e+6"sv) == -5e+6);
-		REQUIRE(Csv::readNumber<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
-		REQUIRE(std::isnan(Csv::readNumber<double>("nan"sv).value()));
+		REQUIRE_FALSE(Csv::readNumberLocale<double>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<double>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<double>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<double>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberLocale<double>("1"sv) == 1.);
+		REQUIRE(Csv::readNumberLocale<double>("-5e+6"sv) == -5e+6);
+		REQUIRE(Csv::readNumberLocale<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
+		REQUIRE(std::isnan(Csv::readNumberLocale<double>("nan"sv).value()));
 
-		REQUIRE_FALSE(Csv::readNumber<int>(""sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<int>("a5"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<int>("5a"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<int>("5 a"sv).has_value());
-		REQUIRE(Csv::readNumber<int>("1"sv) == 1);
-		REQUIRE_FALSE(Csv::readNumber<int>("-5e+6"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<int>("-Inf"sv).has_value());
-		REQUIRE_FALSE(Csv::readNumber<int>("nan"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<int>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<int>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<int>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<int>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberLocale<int>("1"sv) == 1);
+		REQUIRE_FALSE(Csv::readNumberLocale<int>("-5e+6"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<int>("-Inf"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<int>("nan"sv).has_value());
+
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberLocale<std::int64_t>("1"sv) == 1);
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>("-5e+6"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>("-Inf"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::int64_t>("nan"sv).has_value());
+
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberLocale<std::uint64_t>("1"sv) == 1);
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>("-5e+6"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>("-Inf"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberLocale<std::uint64_t>("nan"sv).has_value());
+	}
+
+
+	SECTION("readNumberNoLocale() performs as expected") {
+		// Most of these tests are done in parser test above.
+		REQUIRE_FALSE(Csv::readNumberNoLocale<double>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<double>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<double>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<double>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberNoLocale<double>("1"sv) == 1.);
+		REQUIRE(Csv::readNumberNoLocale<double>("-5e+6"sv) == -5e+6);
+		REQUIRE(Csv::readNumberNoLocale<double>("-Inf"sv) == -std::numeric_limits<double>::infinity());
+		REQUIRE(std::isnan(Csv::readNumberNoLocale<double>("nan"sv).value()));
+
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberNoLocale<int>("1"sv) == 1);
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("-5e+6"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("-Inf"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<int>("nan"sv).has_value());
+
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberNoLocale<std::int64_t>("1"sv) == 1);
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>("-5e+6"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>("-Inf"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::int64_t>("nan"sv).has_value());
+
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>(""sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>("a5"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>("5a"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>("5 a"sv).has_value());
+		REQUIRE(Csv::readNumberNoLocale<std::uint64_t>("1"sv) == 1);
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>("-5e+6"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>("-Inf"sv).has_value());
+		REQUIRE_FALSE(Csv::readNumberNoLocale<std::uint64_t>("nan"sv).has_value());
 	}
 }
 
