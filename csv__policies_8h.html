@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>csv-parser: Member List</title>
+<title>csv-parser: /home/runner/work/csv-parser/csv-parser/csv_parser/csv_policies.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -71,20 +71,38 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>Csv</b></li><li class="navelem"><a class="el" href="classCsv_1_1CellStringValue.html">CellStringValue</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_c90682a1accef0da42999781b73187ff.html">csv_parser</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
-  <div class="headertitle"><div class="title">Csv::CellStringValue Member List</div></div>
+  <div class="summary">
+<a href="#nested-classes">Classes</a>  </div>
+  <div class="headertitle"><div class="title">csv_policies.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>This is the complete list of members for <a class="el" href="classCsv_1_1CellStringValue.html">Csv::CellStringValue</a>, including all inherited members.</p>
-<table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="classCsv_1_1CellStringValue.html#ae1d9ddc44e9509c13966cfe9255b0b3b">CellStringValue</a>()=default</td><td class="entry"><a class="el" href="classCsv_1_1CellStringValue.html">Csv::CellStringValue</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="classCsv_1_1CellStringValue.html#a1d1c205b5525aaa031ae654898f659d3">CellStringValue</a>(std::string_view cell, CellTypeHint hint, BehaviorPolicy policy)</td><td class="entry"><a class="el" href="classCsv_1_1CellStringValue.html">Csv::CellStringValue</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classCsv_1_1CellStringValue.html#a9003a8c7f9ab52f2bd3baa8531f1ed24">getString</a>() const</td><td class="entry"><a class="el" href="classCsv_1_1CellStringValue.html">Csv::CellStringValue</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-</table></div><!-- contents -->
+<p>Behavior policies for <a class="el" href="classCsv_1_1Parser.html" title="The main CSV parser class.">Csv::Parser</a>, passed as template parameter.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="csv__cell_8h_source.html">csv_cell.h</a>&quot;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+</div>
+<p><a href="csv__policies_8h_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCsv_1_1LocaleAwareBehaviorPolicy.html">Csv::LocaleAwareBehaviorPolicy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This policy controls the behavior of the parser.  <a href="structCsv_1_1LocaleAwareBehaviorPolicy.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html">Csv::LocaleUnawareBehaviorPolicy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This policy controls the behavior of the parser.  <a href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Behavior policies for <a class="el" href="classCsv_1_1Parser.html" title="The main CSV parser class.">Csv::Parser</a>, passed as template parameter. </p>
+</div></div><!-- contents -->
 <!-- HTML footer for doxygen 1.9.1-->
 <!-- Custom additions:
 Theme Copyright.

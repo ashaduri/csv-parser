@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['parse_0',['parse',['../classCsv_1_1Parser.html#a0c1be5a60b5678b0faa06c5cf5812ff2',1,'Csv::Parser']]],
+  ['parse_0',['parse',['../classCsv_1_1Parser.html#a9310932100059ff77b032e2bd2509f58',1,'Csv::Parser']]],
   ['parseerror_1',['ParseError',['../classCsv_1_1ParseError.html#af1d0434cb94c1a763337c66b6f699a4f',1,'Csv::ParseError']]],
-  ['parseto2darray_2',['parseTo2DArray',['../classCsv_1_1Parser.html#acc7cef24a3000d3c954c8a3abca3e75c',1,'Csv::Parser']]],
-  ['parseto2dvector_3',['parseTo2DVector',['../classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de',1,'Csv::Parser']]],
-  ['parsetoarray_4',['parseToArray',['../classCsv_1_1Parser.html#ab834839310401e26771fc998fa84b890',1,'Csv::Parser']]],
-  ['parsetovectorcolumnmajor_5',['parseToVectorColumnMajor',['../classCsv_1_1Parser.html#a0d5134990de91404515cd0adc3d22967',1,'Csv::Parser']]],
-  ['parsetovectorrowmajor_6',['parsetovectorrowmajor',['../classCsv_1_1Parser.html#a6c73a0c197d6087f854ea4a46c6f9631',1,'Csv::Parser::parseToVectorRowMajor(std::string_view data, Vector &amp;values) const'],['../classCsv_1_1Parser.html#af5a266801a5924dcd48786ab6746e654',1,'Csv::Parser::parseToVectorRowMajor(std::string_view data, Vector &amp;values, std::optional&lt; std::size_t &gt; rows_hint, std::optional&lt; std::size_t &gt; columns) const']]]
+  ['parser_2',['Parser',['../classCsv_1_1Parser.html#aaa194c0e83882bab6f3a70b3dfadd339',1,'Csv::Parser']]],
+  ['parseto2darray_3',['parseTo2DArray',['../classCsv_1_1Parser.html#a948c98f9b53c2be69720d6e6a07cb8c9',1,'Csv::Parser']]],
+  ['parseto2dvector_4',['parseTo2DVector',['../classCsv_1_1Parser.html#a339bf318f00fde1475e1f0eb7d79e570',1,'Csv::Parser']]],
+  ['parsetoarray_5',['parseToArray',['../classCsv_1_1Parser.html#a3f2d6e882b4c69671ae714b54f989cd6',1,'Csv::Parser']]],
+  ['parsetovectorcolumnmajor_6',['parseToVectorColumnMajor',['../classCsv_1_1Parser.html#a69738371c7b01bebbed598d17d0432f4',1,'Csv::Parser']]],
+  ['parsetovectorrowmajor_7',['parsetovectorrowmajor',['../classCsv_1_1Parser.html#a955b3fc146b97460a9f3c8d7a4ce036f',1,'Csv::Parser::parseToVectorRowMajor(std::string_view data, Vector &amp;values) const'],['../classCsv_1_1Parser.html#a12400e80691f38685e157bd2314dafea',1,'Csv::Parser::parseToVectorRowMajor(std::string_view data, Vector &amp;values, std::optional&lt; std::size_t &gt; rows_hint, std::optional&lt; std::size_t &gt; columns) const']]]
 ];

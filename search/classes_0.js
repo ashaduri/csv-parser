@@ -5,6 +5,5 @@ var searchData=
   ['cellstringbuffer_2',['CellStringBuffer',['../classCsv_1_1CellStringBuffer.html',1,'Csv']]],
   ['cellstringreference_3',['CellStringReference',['../classCsv_1_1CellStringReference.html',1,'Csv']]],
   ['cellstringvalue_4',['CellStringValue',['../classCsv_1_1CellStringValue.html',1,'Csv']]],
-  ['celltrait_5',['CellTrait',['../classCsv_1_1CellTrait.html',1,'Csv']]],
-  ['cellvalue_6',['CellValue',['../classCsv_1_1CellValue.html',1,'Csv']]]
+  ['cellvalue_5',['CellValue',['../classCsv_1_1CellValue.html',1,'Csv']]]
 ];

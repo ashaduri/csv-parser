@@ -90,23 +90,24 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a66f18a07d1d73f0d0ecb423c75b7f638" id="r_a66f18a07d1d73f0d0ecb423c75b7f638"><td class="memItemLeft" align="right" valign="top"><a id="a66f18a07d1d73f0d0ecb423c75b7f638" name="a66f18a07d1d73f0d0ecb423c75b7f638"></a>
-<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a>&#160;</td><td class="memItemRight" valign="bottom"><b>CellStringReference</b> ()=<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">default</a></td></tr>
+constexpr&#160;</td><td class="memItemRight" valign="bottom"><b>CellStringReference</b> ()=default</td></tr>
 <tr class="memdesc:a66f18a07d1d73f0d0ecb423c75b7f638"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor, creates an empty string reference. <br /></td></tr>
 <tr class="separator:a66f18a07d1d73f0d0ecb423c75b7f638"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adaa245db182257a85782c3c143d62014" id="r_adaa245db182257a85782c3c143d62014"><td class="memItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#adaa245db182257a85782c3c143d62014">CellStringReference</a> (std::string_view <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">cell</a>, <a class="el" href="csv__cell_8h.html#ab7bac172b135125e4740a9db4212831d">CellTypeHint</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">hint</a>) <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">noexcept</a></td></tr>
-<tr class="memdesc:adaa245db182257a85782c3c143d62014"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor, which stores a reference to the original cell data.  <br /></td></tr>
-<tr class="separator:adaa245db182257a85782c3c143d62014"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acae0c88e59102b1d85253a72af31f596" id="r_acae0c88e59102b1d85253a72af31f596"><td class="memItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#acae0c88e59102b1d85253a72af31f596">getOriginalStringView</a> (<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">bool</a> *has_escaped_quotes=<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">nullptr</a>) <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">noexcept</a></td></tr>
+<tr class="memitem:a90b53cf88d24eb3745f35e782aad3125" id="r_a90b53cf88d24eb3745f35e782aad3125"><td class="memTemplParams" colspan="2">template&lt;typename BehaviorPolicy &gt; </td></tr>
+<tr class="memitem:a90b53cf88d24eb3745f35e782aad3125"><td class="memTemplItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#a90b53cf88d24eb3745f35e782aad3125">CellStringReference</a> (std::string_view cell, <a class="el" href="csv__cell_8h.html#ab7bac172b135125e4740a9db4212831d">CellTypeHint</a> hint, BehaviorPolicy policy) noexcept</td></tr>
+<tr class="memdesc:a90b53cf88d24eb3745f35e782aad3125"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor, which stores a reference to the original cell data.  <br /></td></tr>
+<tr class="separator:a90b53cf88d24eb3745f35e782aad3125"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acae0c88e59102b1d85253a72af31f596" id="r_acae0c88e59102b1d85253a72af31f596"><td class="memItemLeft" align="right" valign="top">constexpr std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#acae0c88e59102b1d85253a72af31f596">getOriginalStringView</a> (bool *has_escaped_quotes=nullptr) const noexcept</td></tr>
 <tr class="memdesc:acae0c88e59102b1d85253a72af31f596"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get stored cell reference as string_view.  <br /></td></tr>
 <tr class="separator:acae0c88e59102b1d85253a72af31f596"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10c405a746c1f6408fe284eb8cacff3b" id="r_a10c405a746c1f6408fe284eb8cacff3b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#a10c405a746c1f6408fe284eb8cacff3b">getCleanString</a> ()</td></tr>
 <tr class="memdesc:a10c405a746c1f6408fe284eb8cacff3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get stored cell reference a <code>std::string</code>.  <br /></td></tr>
 <tr class="separator:a10c405a746c1f6408fe284eb8cacff3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae91079c3761dc342007931ab92724be2" id="r_ae91079c3761dc342007931ab92724be2"><td class="memTemplParams" colspan="2">template&lt;std::size_t BufferSize&gt; </td></tr>
-<tr class="memitem:ae91079c3761dc342007931ab92724be2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> <a class="el" href="classCsv_1_1CellStringBuffer.html">CellStringBuffer</a>&lt; <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">BufferSize</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#ae91079c3761dc342007931ab92724be2">getCleanStringBuffer</a> () <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a></td></tr>
+<tr class="memitem:ae91079c3761dc342007931ab92724be2"><td class="memTemplItemLeft" align="right" valign="top">constexpr <a class="el" href="classCsv_1_1CellStringBuffer.html">CellStringBuffer</a>&lt; BufferSize &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#ae91079c3761dc342007931ab92724be2">getCleanStringBuffer</a> () const</td></tr>
 <tr class="memdesc:ae91079c3761dc342007931ab92724be2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a string buffer with collapsed consecutive double-quotes.  <br /></td></tr>
 <tr class="separator:ae91079c3761dc342007931ab92724be2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2366569e638ba10d39e2187942d55d0f" id="r_a2366569e638ba10d39e2187942d55d0f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#a2366569e638ba10d39e2187942d55d0f">getRequiredBufferSize</a> () <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a></td></tr>
+<tr class="memitem:a2366569e638ba10d39e2187942d55d0f" id="r_a2366569e638ba10d39e2187942d55d0f"><td class="memItemLeft" align="right" valign="top">constexpr std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringReference.html#a2366569e638ba10d39e2187942d55d0f">getRequiredBufferSize</a> () const</td></tr>
 <tr class="memdesc:a2366569e638ba10d39e2187942d55d0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get required buffer size to use as <a class="el" href="classCsv_1_1CellStringReference.html#ae91079c3761dc342007931ab92724be2" title="Get a string buffer with collapsed consecutive double-quotes.">getCleanStringBuffer()</a>'s template argument.  <br /></td></tr>
 <tr class="separator:a2366569e638ba10d39e2187942d55d0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -114,17 +115,19 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>String data inside a single cell, stored as a reference to the original data. </p>
 <p>All cell contents are treated as having <a class="el" href="csv__cell_8h.html#ae0e3b65210e4929a964cab8fdb0c0464a27118326006d3829667a400ad23d5d98" title="String data.">CellType::String</a> type. This may be useful if the CSV has string data without quotes. </p><dl class="section note"><dt>Note</dt><dd>: Some members of this class are suitable for constexpr context (compile-time parsing). </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="adaa245db182257a85782c3c143d62014" name="adaa245db182257a85782c3c143d62014"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adaa245db182257a85782c3c143d62014">&#9670;&#160;</a></span>CellStringReference()</h2>
+<a id="a90b53cf88d24eb3745f35e782aad3125" name="a90b53cf88d24eb3745f35e782aad3125"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90b53cf88d24eb3745f35e782aad3125">&#9670;&#160;</a></span>CellStringReference()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename BehaviorPolicy &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> Csv::CellStringReference::CellStringReference </td>
+          <td class="memname">constexpr Csv::CellStringReference::CellStringReference </td>
           <td>(</td>
           <td class="paramtype">std::string_view&#160;</td>
           <td class="paramname"><em>cell</em>, </td>
@@ -133,7 +136,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="csv__cell_8h.html#ab7bac172b135125e4740a9db4212831d">CellTypeHint</a>&#160;</td>
-          <td class="paramname"><em>hint</em>&#160;</td>
+          <td class="paramname"><em>hint</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BehaviorPolicy&#160;</td>
+          <td class="paramname"><em>policy</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -143,7 +152,7 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -153,6 +162,13 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">cell</td><td>Cell data to reference. </td></tr>
     <tr><td class="paramname">hint</td><td>Type hint associated with the cell during parsing. </td></tr>
+    <tr><td class="paramname">policy</td><td>Argument used for type inference. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">BehaviorPolicy</td><td>Policy to use for parsing, same as BehaviorPolicy in <a class="el" href="classCsv_1_1Parser.html" title="The main CSV parser class.">Parser</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -200,7 +216,7 @@ template&lt;std::size_t BufferSize&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> <a class="el" href="classCsv_1_1CellStringBuffer.html">CellStringBuffer</a>&lt; <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">BufferSize</a> &gt; Csv::CellStringReference::getCleanStringBuffer </td>
+          <td class="memname">constexpr <a class="el" href="classCsv_1_1CellStringBuffer.html">CellStringBuffer</a>&lt; BufferSize &gt; Csv::CellStringReference::getCleanStringBuffer </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -234,10 +250,10 @@ template&lt;std::size_t BufferSize&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::string_view Csv::CellStringReference::getOriginalStringView </td>
+          <td class="memname">constexpr std::string_view Csv::CellStringReference::getOriginalStringView </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">bool</a> *&#160;</td>
-          <td class="paramname"><em>has_escaped_quotes</em> = <code><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">nullptr</a></code></td><td>)</td>
+          <td class="paramtype">bool *&#160;</td>
+          <td class="paramname"><em>has_escaped_quotes</em> = <code>nullptr</code></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -268,7 +284,7 @@ template&lt;std::size_t BufferSize&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::size_t Csv::CellStringReference::getRequiredBufferSize </td>
+          <td class="memname">constexpr std::size_t Csv::CellStringReference::getRequiredBufferSize </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>

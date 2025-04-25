@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['matrixinformation_0',['MatrixInformation',['../classCsv_1_1MatrixInformation.html',1,'Csv']]]
+  ['localeawarebehaviorpolicy_0',['LocaleAwareBehaviorPolicy',['../structCsv_1_1LocaleAwareBehaviorPolicy.html',1,'Csv']]],
+  ['localeunawarebehaviorpolicy_1',['LocaleUnawareBehaviorPolicy',['../structCsv_1_1LocaleUnawareBehaviorPolicy.html',1,'Csv']]]
 ];

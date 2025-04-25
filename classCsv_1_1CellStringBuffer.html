@@ -86,19 +86,19 @@ $(function() {
 <p>A helper class for compile-time buffer construction and string unescaping.  
  <a href="classCsv_1_1CellStringBuffer.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="csv__cell_8h_source.html">csv_cell.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="csv__cell__string__buffer_8h_source.html">csv_cell_string_buffer.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a88b5a87576913d05b18b674d19f1da23" id="r_a88b5a87576913d05b18b674d19f1da23"><td class="memItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringBuffer.html#a88b5a87576913d05b18b674d19f1da23">CellStringBuffer</a> (std::string_view <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">cell</a>, <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">bool</a> has_escaped_quotes)</td></tr>
+<tr class="memitem:a88b5a87576913d05b18b674d19f1da23" id="r_a88b5a87576913d05b18b674d19f1da23"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringBuffer.html#a88b5a87576913d05b18b674d19f1da23">CellStringBuffer</a> (std::string_view cell, bool has_escaped_quotes)</td></tr>
 <tr class="memdesc:a88b5a87576913d05b18b674d19f1da23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="separator:a88b5a87576913d05b18b674d19f1da23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba1a2554eecf6939572843d9eceeed62" id="r_aba1a2554eecf6939572843d9eceeed62"><td class="memItemLeft" align="right" valign="top"><a id="aba1a2554eecf6939572843d9eceeed62" name="aba1a2554eecf6939572843d9eceeed62"></a>
-<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>getStringView</b> () <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a></td></tr>
+constexpr std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>getStringView</b> () const</td></tr>
 <tr class="memdesc:aba1a2554eecf6939572843d9eceeed62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a string view to the stored data. <br /></td></tr>
 <tr class="separator:aba1a2554eecf6939572843d9eceeed62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c33e8bdc2bd6cd8e266c0cc746063f2" id="r_a0c33e8bdc2bd6cd8e266c0cc746063f2"><td class="memItemLeft" align="right" valign="top"><a id="a0c33e8bdc2bd6cd8e266c0cc746063f2" name="a0c33e8bdc2bd6cd8e266c0cc746063f2"></a>
-<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>getBufferSize</b> () <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">noexcept</a></td></tr>
+constexpr std::size_t&#160;</td><td class="memItemRight" valign="bottom"><b>getBufferSize</b> () const noexcept</td></tr>
 <tr class="memdesc:a0c33e8bdc2bd6cd8e266c0cc746063f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return buffer size, as determined by the template parameter. <br /></td></tr>
 <tr class="separator:a0c33e8bdc2bd6cd8e266c0cc746063f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -124,7 +124,7 @@ template&lt;std::size_t Size&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> <a class="el" href="classCsv_1_1CellStringBuffer.html">Csv::CellStringBuffer</a>&lt; <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">Size</a> &gt;::CellStringBuffer </td>
+          <td class="memname">constexpr <a class="el" href="classCsv_1_1CellStringBuffer.html">Csv::CellStringBuffer</a>&lt; Size &gt;::CellStringBuffer </td>
           <td>(</td>
           <td class="paramtype">std::string_view&#160;</td>
           <td class="paramname"><em>cell</em>, </td>
@@ -132,7 +132,7 @@ template&lt;std::size_t Size&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">bool</a>&#160;</td>
+          <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>has_escaped_quotes</em>&#160;</td>
         </tr>
         <tr>
@@ -166,7 +166,7 @@ template&lt;std::size_t Size&gt; </div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/runner/work/csv-parser/csv-parser/csv_parser/<a class="el" href="csv__cell_8h_source.html">csv_cell.h</a></li>
+<li>/home/runner/work/csv-parser/csv-parser/csv_parser/<a class="el" href="csv__cell__string__buffer_8h_source.html">csv_cell_string_buffer.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.9.1-->

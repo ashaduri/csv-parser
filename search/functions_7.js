@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['useemptycelltype_0',['useemptycelltype',['../classCsv_1_1Parser.html#a6fca28ba476ad1d42d44e3699816d09a',1,'Csv::Parser::useEmptyCellType(bool use_empty_cell_type)'],['../classCsv_1_1Parser.html#adb50ec57718d5650c6119d392b3149a2',1,'Csv::Parser::useEmptyCellType() const']]]
+  ['useemptycelltype_0',['useemptycelltype',['../structCsv_1_1LocaleAwareBehaviorPolicy.html#a47b5758a1ee98960d30093a25d82db4a',1,'Csv::LocaleAwareBehaviorPolicy::useEmptyCellType()'],['../structCsv_1_1LocaleUnawareBehaviorPolicy.html#a21265e39f2cd45fd42a6a55824715980',1,'Csv::LocaleUnawareBehaviorPolicy::useEmptyCellType()']]]
 ];

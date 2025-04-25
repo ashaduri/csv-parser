@@ -82,9 +82,11 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Cell-related classes.  
+<p>Various Cell-related classes.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;string_view&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="csv__util_8h_source.html">csv_util.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="csv__cell__string__buffer_8h_source.html">csv_cell_string_buffer.h</a>&quot;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
@@ -92,15 +94,11 @@ $(function() {
 <code>#include &lt;limits&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
-<code>#include &quot;<a class="el" href="csv__util_8h_source.html">csv_util.h</a>&quot;</code><br />
 </div>
 <p><a href="csv__cell_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringBuffer.html">Csv::CellStringBuffer&lt; Size &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A helper class for compile-time buffer construction and string unescaping.  <a href="classCsv_1_1CellStringBuffer.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellReference.html">Csv::CellReference</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data inside a single cell, potentially stored as a reference to the original data.  <a href="classCsv_1_1CellReference.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -115,9 +113,6 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellStringValue.html">Csv::CellStringValue</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A value of a cell.  <a href="classCsv_1_1CellStringValue.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCsv_1_1CellTrait.html">Csv::CellTrait&lt; CellT &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classCsv_1_1Parser.html#a0c1be5a60b5678b0faa06c5cf5812ff2" title="Parse CSV string data and store the results using a callback function.">Parser::parse</a>*() functions use this to create the an element of a container.  <a href="classCsv_1_1CellTrait.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
@@ -137,7 +132,7 @@ Enumerations</h2></td></tr>
 <tr class="separator:ae0e3b65210e4929a964cab8fdb0c0464"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Cell-related classes. </p>
+<div class="textblock"><p>Various Cell-related classes. </p>
 </div><h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="ae0e3b65210e4929a964cab8fdb0c0464" name="ae0e3b65210e4929a964cab8fdb0c0464"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae0e3b65210e4929a964cab8fdb0c0464">&#9670;&#160;</a></span>CellType</h2>

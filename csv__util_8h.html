@@ -88,6 +88,7 @@ $(function() {
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;charconv&gt;</code><br />
 </div>
 <p><a href="csv__util_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -96,15 +97,19 @@ Functions</h2></td></tr>
 <tr class="memitem:ae80dc9d78602c75a7d1d2ab001285b17" id="r_ae80dc9d78602c75a7d1d2ab001285b17"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#ae80dc9d78602c75a7d1d2ab001285b17">Csv::cleanString</a> (std::string_view view)</td></tr>
 <tr class="memdesc:ae80dc9d78602c75a7d1d2ab001285b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unescape a string - collapse every occurrence of 2 consecutive double-quotes to one.  <br /></td></tr>
 <tr class="separator:ae80dc9d78602c75a7d1d2ab001285b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca31dea3229ed72bcdeb776d6212411b" id="r_aca31dea3229ed72bcdeb776d6212411b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#aca31dea3229ed72bcdeb776d6212411b">Csv::getCleanStringSize</a> (std::string_view <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">uncollapsed_view</a>)</td></tr>
+<tr class="memitem:aca31dea3229ed72bcdeb776d6212411b" id="r_aca31dea3229ed72bcdeb776d6212411b"><td class="memItemLeft" align="right" valign="top">constexpr std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#aca31dea3229ed72bcdeb776d6212411b">Csv::getCleanStringSize</a> (std::string_view uncollapsed_view)</td></tr>
 <tr class="memdesc:aca31dea3229ed72bcdeb776d6212411b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of a cleaned-up string given the uncollapsed string.  <br /></td></tr>
 <tr class="separator:aca31dea3229ed72bcdeb776d6212411b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bb5200373a7107356d9958f807c29f1" id="r_a9bb5200373a7107356d9958f807c29f1"><td class="memTemplParams" colspan="2">template&lt;typename Number &gt; </td></tr>
-<tr class="memitem:a9bb5200373a7107356d9958f807c29f1"><td class="memTemplItemLeft" align="right" valign="top">std::optional&lt; Number &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">Csv::readNumber</a> (std::string_view cell)</td></tr>
-<tr class="memdesc:a9bb5200373a7107356d9958f807c29f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to read a numeric value from string data.  <br /></td></tr>
-<tr class="separator:a9bb5200373a7107356d9958f807c29f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1029ae87f63b135f785d2f8e5f12fec" id="r_ab1029ae87f63b135f785d2f8e5f12fec"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">typename</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">Vector2D</a> &gt; </td></tr>
-<tr class="memitem:ab1029ae87f63b135f785d2f8e5f12fec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">constexpr</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">auto</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#ab1029ae87f63b135f785d2f8e5f12fec">Csv::vector2DValue</a> (<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">Vector2D</a> &amp;<a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">values</a>, std::size_t row, std::size_t column)</td></tr>
+<tr class="memitem:a89a25caa18eb2522701e90c255b930d4" id="r_a89a25caa18eb2522701e90c255b930d4"><td class="memTemplParams" colspan="2">template&lt;typename Number &gt; </td></tr>
+<tr class="memitem:a89a25caa18eb2522701e90c255b930d4"><td class="memTemplItemLeft" align="right" valign="top">std::optional&lt; Number &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#a89a25caa18eb2522701e90c255b930d4">Csv::readNumberLocale</a> (std::string_view cell)</td></tr>
+<tr class="memdesc:a89a25caa18eb2522701e90c255b930d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to read a numeric value from string data.  <br /></td></tr>
+<tr class="separator:a89a25caa18eb2522701e90c255b930d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc42a3ace4f400e73fe40f0f56fea797" id="r_abc42a3ace4f400e73fe40f0f56fea797"><td class="memTemplParams" colspan="2">template&lt;typename Number &gt; </td></tr>
+<tr class="memitem:abc42a3ace4f400e73fe40f0f56fea797"><td class="memTemplItemLeft" align="right" valign="top">std::optional&lt; Number &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#abc42a3ace4f400e73fe40f0f56fea797">Csv::readNumberNoLocale</a> (std::string_view cell)</td></tr>
+<tr class="memdesc:abc42a3ace4f400e73fe40f0f56fea797"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to read a numeric value from string data.  <br /></td></tr>
+<tr class="separator:abc42a3ace4f400e73fe40f0f56fea797"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1029ae87f63b135f785d2f8e5f12fec" id="r_ab1029ae87f63b135f785d2f8e5f12fec"><td class="memTemplParams" colspan="2">template&lt;typename Vector2D &gt; </td></tr>
+<tr class="memitem:ab1029ae87f63b135f785d2f8e5f12fec"><td class="memTemplItemLeft" align="right" valign="top">constexpr auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="csv__util_8h.html#ab1029ae87f63b135f785d2f8e5f12fec">Csv::vector2DValue</a> (const Vector2D &amp;values, std::size_t row, std::size_t column)</td></tr>
 <tr class="memdesc:ab1029ae87f63b135f785d2f8e5f12fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">A helper function to get an element of a 2D vector in less error-prone way.  <br /></td></tr>
 <tr class="separator:ab1029ae87f63b135f785d2f8e5f12fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -181,8 +186,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a9bb5200373a7107356d9958f807c29f1" name="a9bb5200373a7107356d9958f807c29f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bb5200373a7107356d9958f807c29f1">&#9670;&#160;</a></span>readNumber()</h2>
+<a id="a89a25caa18eb2522701e90c255b930d4" name="a89a25caa18eb2522701e90c255b930d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89a25caa18eb2522701e90c255b930d4">&#9670;&#160;</a></span>readNumberLocale()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -190,7 +195,7 @@ Functions</h2></td></tr>
 template&lt;typename Number &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; Number &gt; Csv::readNumber </td>
+          <td class="memname">std::optional&lt; Number &gt; Csv::readNumberLocale </td>
           <td>(</td>
           <td class="paramtype">std::string_view&#160;</td>
           <td class="paramname"><em>cell</em></td><td>)</td>
@@ -201,6 +206,44 @@ template&lt;typename Number &gt; </div>
 
 <p>Try to read a numeric value from string data. </p>
 <p>Unless the string data completely represents a serialized int/float/double/..., <code>std::nullopt</code> is returned. </p><dl class="section note"><dt>Note</dt><dd>This function is locale-dependent. </dd></dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Number</td><td>Type of number to read, e.g. int, float, double, etc. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cell</td><td>String data to parse, with optional whitespace on one or both sides. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed number or <code>std::nullopt</code> if parsing failed. </dd></dl>
+
+</div>
+</div>
+<a id="abc42a3ace4f400e73fe40f0f56fea797" name="abc42a3ace4f400e73fe40f0f56fea797"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc42a3ace4f400e73fe40f0f56fea797">&#9670;&#160;</a></span>readNumberNoLocale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Number &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; Number &gt; Csv::readNumberNoLocale </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>cell</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Try to read a numeric value from string data. </p>
+<p>Unless the string data completely represents a serialized int/float/double/..., <code>std::nullopt</code> is returned. </p><dl class="section note"><dt>Note</dt><dd>This function is locale-independent. </dd>
+<dd>
+This function is constexpr in C++23+ when parsing integral types. </dd></dl>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Number</td><td>Type of number to read, e.g. int, float, double, etc. </td></tr>
@@ -231,7 +274,7 @@ template&lt;typename Vector2D &gt; </div>
         <tr>
           <td class="memname">constexpr auto Csv::vector2DValue </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">const</a> <a class="el" href="csv__util_8h.html#a9bb5200373a7107356d9958f807c29f1">Vector2D</a> &amp;&#160;</td>
+          <td class="paramtype">const Vector2D &amp;&#160;</td>
           <td class="paramname"><em>values</em>, </td>
         </tr>
         <tr>

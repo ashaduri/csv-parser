@@ -74,18 +74,19 @@ $(function() {
   <div class="headertitle"><div class="title"><a class="el" href="classCsv_1_1Parser.html" title="The main CSV parser class.">Csv::Parser</a> (csv-parser) </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md__2home_2runner_2work_2csv-parser_2csv-parser_2README"></a><em><b>Compile-time and runtime CSV parser written in C++17</b></em></p>
-<p><a href="https://github.com/ashaduri/csv-parser"><img src="https://img.shields.io/github/v/release/ashaduri/csv-parser?label=Version" alt="GitHub release (latest SemVer)" class="inline"/></a> <img src="https://img.shields.io/github/license/ashaduri/csv-parser" alt="GitHub" class="inline"/> <img src="https://img.shields.io/badge/language-ISO%20C++17-blue" alt="Language" class="inline"/></p>
+<div class="textblock"><p><a class="anchor" id="md__2home_2runner_2work_2csv-parser_2csv-parser_2README"></a><em><b>Compile-time and runtime CSV parser written in Modern C++</b></em></p>
+<p><a href="https://github.com/ashaduri/csv-parser"><img src="https://img.shields.io/github/v/release/ashaduri/csv-parser?label=Version" alt="GitHub release (latest SemVer)" class="inline"/></a> <img src="https://img.shields.io/github/license/ashaduri/csv-parser" alt="GitHub" class="inline"/> <img src="https://img.shields.io/badge/language-Modern%20C++-blue" alt="Language" class="inline"/></p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Features</h1>
 <ul>
 <li>Header-only.</li>
-<li>Requires only standard C++ (C++17).</li>
-<li>Supports reading CSV data from <code>std::string_view</code> during compilation (using <code>constexpr</code>).</li>
+<li>Requires only standard C++ (minimum C++17, with C++23 support providing additional functionality).</li>
+<li>Supports reading CSV data from <code>std::string_view</code> at compile-time.</li>
 <li>Fully supports <a href="https://www.ietf.org/rfc/rfc4180.txt">RFC 4180</a>, including quoted values, escaped quotes, and newlines in field values.</li>
 <li>Liberal in terms of accepting not-quite-standard CSV files, but detects errors when needed.</li>
 <li>Supports Excel CSV variations.</li>
-<li>Supports reading data as different types (string, double, empty field) (runtime only).</li>
+<li>Supports reading data as different types (string, double, empty field), with some restrictions when parsing at compile-time.</li>
+<li>Modular design allows for easy extension of the library.</li>
 <li>Extensively tested using <a href="https://github.com/catchorg/Catch2">Catch2</a>.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md2"></a>
@@ -116,7 +117,7 @@ Example:</h3>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">try</span> {</div>
 <div class="line">    <span class="comment">// This throws Csv::ParseError on error.</span></div>
-<div class="line">    parser.<a class="code hl_function" href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">parseTo2DVector</a>(data, cell_refs);</div>
+<div class="line">    parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a339bf318f00fde1475e1f0eb7d79e570">parseTo2DVector</a>(data, cell_refs);</div>
 <div class="line">}</div>
 <div class="line"><span class="keywordflow">catch</span>(<a class="code hl_class" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
 <div class="line">    std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
@@ -137,8 +138,8 @@ Example:</h3>
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Column 0, row 1: &quot;</span> &lt;&lt; cell_refs[0][1].getDouble().value() &lt;&lt; std::endl;  <span class="comment">// 5</span></div>
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Column 1, row 1: &quot;</span> &lt;&lt; cell_refs[1][1].getDouble().value() &lt;&lt; std::endl;  <span class="comment">// 6</span></div>
 <div class="ttc" id="aclassCsv_1_1ParseError_html"><div class="ttname"><a href="classCsv_1_1ParseError.html">Csv::ParseError</a></div><div class="ttdoc">Exception thrown on CSV parse error.</div><div class="ttdef"><b>Definition</b> csv_error.h:25</div></div>
-<div class="ttc" id="aclassCsv_1_1Parser_html"><div class="ttname"><a href="classCsv_1_1Parser.html">Csv::Parser</a></div><div class="ttdoc">The main CSV parser class.</div><div class="ttdef"><b>Definition</b> csv_parser.h:69</div></div>
-<div class="ttc" id="aclassCsv_1_1Parser_html_add6271c8b7bd1d239dd2d2cd5bc636de"><div class="ttname"><a href="classCsv_1_1Parser.html#add6271c8b7bd1d239dd2d2cd5bc636de">Csv::Parser::parseTo2DVector</a></div><div class="ttdeci">constexpr void parseTo2DVector(std::string_view data, Vector2D &amp;values) const</div><div class="ttdoc">Parse CSV string data into a vector of columns.</div><div class="ttdef"><b>Definition</b> csv_parser.h:503</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html"><div class="ttname"><a href="classCsv_1_1Parser.html">Csv::Parser</a></div><div class="ttdoc">The main CSV parser class.</div><div class="ttdef"><b>Definition</b> csv_parser.h:70</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_a339bf318f00fde1475e1f0eb7d79e570"><div class="ttname"><a href="classCsv_1_1Parser.html#a339bf318f00fde1475e1f0eb7d79e570">Csv::Parser::parseTo2DVector</a></div><div class="ttdeci">constexpr void parseTo2DVector(std::string_view data, Vector2D &amp;values) const</div><div class="ttdoc">Parse CSV string data into a vector of columns.</div><div class="ttdef"><b>Definition</b> csv_parser.h:484</div></div>
 <div class="ttc" id="acsv__parser_8h_html"><div class="ttname"><a href="csv__parser_8h.html">csv_parser.h</a></div><div class="ttdoc">Main include file for the library.</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md6"></a>
 Runtime Parsing of Numeric Matrix Into 1D Vector With Row-Major Order</h2>
@@ -162,7 +163,7 @@ Example:</h3>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">try</span> {</div>
 <div class="line">    <span class="comment">// This throws Csv::ParseError on error.</span></div>
-<div class="line">    info = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a6c73a0c197d6087f854ea4a46c6f9631">parseToVectorRowMajor</a>(data, matrix_data);</div>
+<div class="line">    info = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a955b3fc146b97460a9f3c8d7a4ce036f">parseToVectorRowMajor</a>(data, matrix_data);</div>
 <div class="line">}</div>
 <div class="line"><span class="keywordflow">catch</span>(<a class="code hl_class" href="classCsv_1_1ParseError.html">Csv::ParseError</a>&amp; ex) {</div>
 <div class="line">    std::cerr &lt;&lt; <span class="stringliteral">&quot;CSV parse error: &quot;</span> &lt;&lt; ex.what() &lt;&lt; std::endl;</div>
@@ -187,12 +188,16 @@ Example:</h3>
 <div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a60f9385f02bfcd80372ebc977c757a47"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a60f9385f02bfcd80372ebc977c757a47">Csv::MatrixInformation::getRows</a></div><div class="ttdeci">constexpr std::size_t getRows() const</div><div class="ttdoc">Get number of rows in matrix.</div><div class="ttdef"><b>Definition</b> csv_matrix.h:64</div></div>
 <div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a6cef576cad568c4dc92ec8d7233ff0b6"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a6cef576cad568c4dc92ec8d7233ff0b6">Csv::MatrixInformation::getColumns</a></div><div class="ttdeci">constexpr std::size_t getColumns() const</div><div class="ttdoc">Get number of columns in matrix.</div><div class="ttdef"><b>Definition</b> csv_matrix.h:78</div></div>
 <div class="ttc" id="aclassCsv_1_1MatrixInformation_html_a892efedc00f6f80a09b90744856977a5"><div class="ttname"><a href="classCsv_1_1MatrixInformation.html#a892efedc00f6f80a09b90744856977a5">Csv::MatrixInformation::matrixIndex</a></div><div class="ttdeci">static constexpr std::size_t matrixIndex(std::size_t row, std::size_t column, std::size_t rows, std::size_t columns, MatrixOrder order)</div><div class="ttdoc">Get index (offset) in flat-matrix vector.</div><div class="ttdef"><b>Definition</b> csv_matrix.h:42</div></div>
-<div class="ttc" id="aclassCsv_1_1Parser_html_a6c73a0c197d6087f854ea4a46c6f9631"><div class="ttname"><a href="classCsv_1_1Parser.html#a6c73a0c197d6087f854ea4a46c6f9631">Csv::Parser::parseToVectorRowMajor</a></div><div class="ttdeci">constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector &amp;values) const</div><div class="ttdoc">Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ....</div><div class="ttdef"><b>Definition</b> csv_parser.h:543</div></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_a955b3fc146b97460a9f3c8d7a4ce036f"><div class="ttname"><a href="classCsv_1_1Parser.html#a955b3fc146b97460a9f3c8d7a4ce036f">Csv::Parser::parseToVectorRowMajor</a></div><div class="ttdeci">constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector &amp;values) const</div><div class="ttdoc">Parse CSV string data into a flat matrix in row-major format (A11, A12, A13, A21, ....</div><div class="ttdef"><b>Definition</b> csv_parser.h:527</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md8"></a>
-Compile-Time Parsing</h2>
+Compile-Time Parsing Into 2D &lt;tt&gt;std::array&lt;/tt&gt;</h2>
 <p>Currently, parsing at compile-time has some restrictions:</p><ul>
-<li>Only string_views are supported for output (no doubles).</li>
 <li>To collapse consecutive double-quotes in strings, a compile-time-allocated buffer has to be used.</li>
+<li>By default, only string_views are supported for output (no numeric types).<ul>
+<li>If using C++23 or later, integral types are supported as well.</li>
+<li>If compile-time parsing of floating point numbers is needed, <a href="https://github.com/fastfloat/fast_float">fast_float</a> can be plugged in.</li>
+</ul>
+</li>
 </ul>
 <p>One (possibly useful) consequence of compile-time parsing is that a parse error also causes a compilation error.</p>
 <h3><a class="anchor" id="autotoc_md9"></a>
@@ -203,16 +208,15 @@ Example:</h3>
 <div class="line"> </div>
 <div class="line"><span class="keyword">using namespace </span>std::string_view_literals;</div>
 <div class="line"> </div>
+<div class="line"><span class="keyword">constexpr</span> std::size_t columns = 2, rows = 2;</div>
 <div class="line"><span class="keyword">constexpr</span> std::string_view data =</div>
 <div class="line">R<span class="stringliteral">&quot;(abc, &quot;def&quot;</span></div>
 <div class="line"><span class="stringliteral">&quot;with &quot;&quot;quote inside&quot;,6)&quot;;</span></div>
 <div class="line"><span class="stringliteral"></span> </div>
-<div class="line"><span class="stringliteral"></span><span class="keyword">constexpr</span> std::size_t columns = 2, rows = 2;</div>
-<div class="line"> </div>
-<div class="line"><span class="keyword">constexpr</span> <a class="code hl_class" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
+<div class="line"><span class="stringliteral"></span><span class="keyword">constexpr</span> <a class="code hl_class" href="classCsv_1_1Parser.html">Csv::Parser</a> parser;</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// parse into std::array&lt;std::array&lt;CellStringReference, rows&gt;, columns&gt;</span></div>
-<div class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> matrix = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#acc7cef24a3000d3c954c8a3abca3e75c">parseTo2DArray</a>&lt;rows, columns&gt;(data);</div>
+<div class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> matrix = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a948c98f9b53c2be69720d6e6a07cb8c9">parseTo2DArray</a>&lt;rows, columns&gt;(data);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Verify the data at compile time.</span></div>
 <div class="line"><span class="comment">// Note that consecutive double-quotes are not collapsed when using</span></div>
@@ -229,8 +233,97 @@ Example:</h3>
 <div class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> buffer_size = matrix[0][1].getRequiredBufferSize();  <span class="comment">// collapsed size</span></div>
 <div class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> buffer = matrix[0][1].getCleanStringBuffer&lt;buffer_size&gt;();</div>
 <div class="line"><span class="keyword">static_assert</span>(buffer.getStringView() == R<span class="stringliteral">&quot;(with &quot;quote inside)&quot;sv);</span></div>
-<div class="ttc" id="aclassCsv_1_1Parser_html_acc7cef24a3000d3c954c8a3abca3e75c"><div class="ttname"><a href="classCsv_1_1Parser.html#acc7cef24a3000d3c954c8a3abca3e75c">Csv::Parser::parseTo2DArray</a></div><div class="ttdeci">constexpr auto parseTo2DArray(std::string_view data) const</div><div class="ttdoc">Parse CSV string to 2D std::array, an array of columns.</div><div class="ttdef"><b>Definition</b> csv_parser.h:524</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md10"></a>
+<div class="ttc" id="aclassCsv_1_1Parser_html_a948c98f9b53c2be69720d6e6a07cb8c9"><div class="ttname"><a href="classCsv_1_1Parser.html#a948c98f9b53c2be69720d6e6a07cb8c9">Csv::Parser::parseTo2DArray</a></div><div class="ttdeci">constexpr auto parseTo2DArray(std::string_view data) const</div><div class="ttdoc">Parse CSV string to 2D std::array, an array of columns.</div><div class="ttdef"><b>Definition</b> csv_parser.h:507</div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md10"></a>
+Compile-Time Parsing of Integral Matrix Into 1D Vector</h2>
+<p>The library can be used to parse CSV data at compile-time into a 1D vector, in row-major or column-major order. Additionally, compile-time parsing of integral types is supported since C++23.</p>
+<h3><a class="anchor" id="autotoc_md11"></a>
+Example:</h3>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="csv__parser_8h.html">csv_parser.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// ...</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">using namespace </span>std::string_view_literals;</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">constexpr</span> std::size_t columns = 2, rows = 3;</div>
+<div class="line"><span class="keyword">constexpr</span> std::string_view data =</div>
+<div class="line">R<span class="stringliteral">&quot;(11, -12</span></div>
+<div class="line"><span class="stringliteral">21, 4</span></div>
+<div class="line"><span class="stringliteral">60, -10)&quot;;</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral"></span><span class="comment">// Use Csv::LocaleUnawareBehaviorPolicy to avoid locale issues and allow compile-time integer parsing.</span></div>
+<div class="line"><span class="keyword">constexpr</span> <a class="code hl_class" href="classCsv_1_1Parser.html">Csv::Parser&lt;Csv::LocaleUnawareBehaviorPolicy&gt;</a> parser;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Parse into std::array&lt;CellStringReference, rows * columns&gt; in row-major order</span></div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">constexpr</span> <span class="keyword">auto</span> matrix = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a3f2d6e882b4c69671ae714b54f989cd6">parseToArray</a>&lt;rows, columns&gt;(data, Csv::MatrixOrder::RowMajor);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">static_assert</span>(matrix[0].getOriginalStringView() == <span class="stringliteral">&quot;11&quot;</span>sv);</div>
+<div class="line">    <span class="keyword">static_assert</span>(matrix[2].getOriginalStringView() == <span class="stringliteral">&quot;21&quot;</span>sv);</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Parse into std::array&lt;std::int64_t, rows * columns&gt; in column-major order.</span></div>
+<div class="line"><span class="comment">// Compile-time parsing to integers is supported since C++23.</span></div>
+<div class="line"><span class="preprocessor">#if __cplusplus &gt;= 202300L</span></div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">constexpr</span> <span class="keyword">auto</span> matrix = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a3f2d6e882b4c69671ae714b54f989cd6">parseToArray</a>&lt;rows, columns, std::int64_t&gt;(data, Csv::MatrixOrder::ColumnMajor);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">static_assert</span>(matrix[0] == 11);</div>
+<div class="line">    <span class="keyword">static_assert</span>(matrix[2] == 60);</div>
+<div class="line">}</div>
+<div class="line"><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassCsv_1_1Parser_html_a3f2d6e882b4c69671ae714b54f989cd6"><div class="ttname"><a href="classCsv_1_1Parser.html#a3f2d6e882b4c69671ae714b54f989cd6">Csv::Parser::parseToArray</a></div><div class="ttdeci">constexpr auto parseToArray(std::string_view data, MatrixOrder order) const</div><div class="ttdoc">Parse CSV string to 1D std::array, stored in row-major or column-major order.</div><div class="ttdef"><b>Definition</b> csv_parser.h:635</div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md12"></a>
+Compile-Time Parsing of Numeric Matrix Using External Library for Floating Point Numbers</h2>
+<p>A library like <a href="https://github.com/fastfloat/fast_float">fast_float</a> can be used to parse floating point numbers at compile-time. This is done by creating a custom policy that implements the <code>readNumber</code> and <code>create</code> methods. This approach also allows for improving the performance of parsing floating point numbers compared to the standard library.</p>
+<h3><a class="anchor" id="autotoc_md13"></a>
+Example:</h3>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="csv__parser_8h.html">csv_parser.h</a>&quot;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;fast_float/fast_float.h&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Custom policy which uses fast_float library for parsing to floating point.</span></div>
+<div class="line"><span class="keyword">struct </span>CustomPolicy : <a class="code hl_struct" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html">Csv::LocaleUnawareBehaviorPolicy</a> {</div>
+<div class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Number&gt;</div>
+<div class="line">    <span class="keyword">static</span> <span class="keyword">constexpr</span> std::optional&lt;Number&gt; <a class="code hl_function" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a0d187f244be774e25dd0992f1e2a53c2">readNumber</a>(std::string_view cell)</div>
+<div class="line">    {</div>
+<div class="line">        Number parsed_value = 0;</div>
+<div class="line">        <span class="keyword">auto</span> [ptr, <a class="code hl_function" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a0d187f244be774e25dd0992f1e2a53c2">ec</a>] = fast_float::from_chars(cell.begin(), cell.end(), parsed_value);</div>
+<div class="line">        <span class="keywordflow">if</span> (ec == std::errc() &amp;&amp; ptr == (cell.end())) {</div>
+<div class="line">            <span class="keywordflow">return</span> <a class="code hl_function" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a0d187f244be774e25dd0992f1e2a53c2">parsed_value</a>;</div>
+<div class="line">        }</div>
+<div class="line">        <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> CellT&gt;</div>
+<div class="line">    <span class="keyword">static</span> <span class="keyword">constexpr</span> CellT <a class="code hl_function" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a132644f49212774bcb5a929748db8609">create</a>(std::string_view cell, <a class="code hl_enumeration" href="csv__cell_8h.html#ab7bac172b135125e4740a9db4212831d">Csv::CellTypeHint</a> hint)</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordflow">return</span> <a class="code hl_function" href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a0d187f244be774e25dd0992f1e2a53c2">readNumber&lt;CellT&gt;</a>(cell).value_or(std::numeric_limits&lt;CellT&gt;::quiet_NaN());</div>
+<div class="line">    }</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> parse()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">constexpr</span> std::string_view data =</div>
+<div class="line">    R<span class="stringliteral">&quot;(11.6, -12.3</span></div>
+<div class="line"><span class="stringliteral">2e5, -inf</span></div>
+<div class="line"><span class="stringliteral">nan, inf)&quot;;</span></div>
+<div class="line"><span class="stringliteral"></span> </div>
+<div class="line"><span class="stringliteral">    </span><span class="comment">// Use custom policy which uses fast_float library for parsing to floating point.</span></div>
+<div class="line">    <span class="keyword">constexpr</span> <a class="code hl_class" href="classCsv_1_1Parser.html">Csv::Parser&lt;CustomPolicy&gt;</a> parser;</div>
+<div class="line">    <span class="keyword">constexpr</span> std::size_t columns = 2, rows = 3;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Parse into std::array&lt;double, rows * columns&gt; in row-major order</span></div>
+<div class="line">    <span class="keyword">constexpr</span> <span class="keyword">auto</span> matrix = parser.<a class="code hl_function" href="classCsv_1_1Parser.html#a3f2d6e882b4c69671ae714b54f989cd6">parseToArray</a>&lt;rows, columns, <span class="keywordtype">double</span>&gt;(data, Csv::MatrixOrder::RowMajor);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keyword">static_assert</span>(matrix[0] == 11.6);</div>
+<div class="line">    <span class="keyword">static_assert</span>(matrix[3] == -std::numeric_limits&lt;double&gt;::infinity());</div>
+<div class="line">}</div>
+<div class="ttc" id="acsv__cell_8h_html_ab7bac172b135125e4740a9db4212831d"><div class="ttname"><a href="csv__cell_8h.html#ab7bac172b135125e4740a9db4212831d">Csv::CellTypeHint</a></div><div class="ttdeci">CellTypeHint</div><div class="ttdoc">Type hint associated with the cell to determine the type of the cell value.</div><div class="ttdef"><b>Definition</b> csv_cell.h:32</div></div>
+<div class="ttc" id="astructCsv_1_1LocaleUnawareBehaviorPolicy_html"><div class="ttname"><a href="structCsv_1_1LocaleUnawareBehaviorPolicy.html">Csv::LocaleUnawareBehaviorPolicy</a></div><div class="ttdoc">This policy controls the behavior of the parser.</div><div class="ttdef"><b>Definition</b> csv_policies.h:74</div></div>
+<div class="ttc" id="astructCsv_1_1LocaleUnawareBehaviorPolicy_html_a0d187f244be774e25dd0992f1e2a53c2"><div class="ttname"><a href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a0d187f244be774e25dd0992f1e2a53c2">Csv::LocaleUnawareBehaviorPolicy::readNumber</a></div><div class="ttdeci">static constexpr std::optional&lt; Number &gt; readNumber(std::string_view cell)</div><div class="ttdoc">Try to read a numeric value from string data.</div><div class="ttdef"><b>Definition</b> csv_policies.h:87</div></div>
+<div class="ttc" id="astructCsv_1_1LocaleUnawareBehaviorPolicy_html_a132644f49212774bcb5a929748db8609"><div class="ttname"><a href="structCsv_1_1LocaleUnawareBehaviorPolicy.html#a132644f49212774bcb5a929748db8609">Csv::LocaleUnawareBehaviorPolicy::create</a></div><div class="ttdeci">static constexpr CellT create(std::string_view cell, CellTypeHint hint)</div><div class="ttdoc">Create an object of type CellT from cell contents represented as string_view.</div><div class="ttdef"><b>Definition</b> csv_policies.h:96</div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md14"></a>
 Copyright</h1>
 <p>Copyright: Alexander Shaduri <a href="#" onclick="location.href='mai'+'lto:'+'ash'+'ad'+'uri'+'@g'+'mai'+'l.'+'com'; return false;">ashad<span class="obfuscator">.nosp@m.</span>uri@<span class="obfuscator">.nosp@m.</span>gmail<span class="obfuscator">.nosp@m.</span>.com</a> <br  />
  License: Zlib </p>
