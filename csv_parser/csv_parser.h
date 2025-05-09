@@ -81,7 +81,7 @@ class Parser {
 		///		Deduced automatically.
 		/// \param data Full CSV string data.
 		/// \param storeCellFunc Callback function to store each parsed cell data.
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		template<typename StoreCellFunction>
 		constexpr void parse(std::string_view data, StoreCellFunction storeCellFunc) const;
 
@@ -91,7 +91,7 @@ class Parser {
 		/// \tparam Vector2D A 2D vector type, e.g. `std::vector<std::vector<CellReference>>`, deduced automatically.
 		/// \param data Full CSV string data.
 		/// \param[out] values An empty 2D vector to store the data in.
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		///
 		/// Example:
 		/// \include example_runtime.cpp
@@ -106,7 +106,7 @@ class Parser {
 		/// \tparam Cell Type of cell in array, e.g. CellStringReference. Must be constexpr-compatible.
 		/// \param data Full CSV string data.
 		/// \return `std::array<std::array<Cell, rows>, columns>`
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		///
 		/// Example:
 		/// \include example_compiletime.cpp
@@ -120,7 +120,7 @@ class Parser {
 		/// \param data Full CSV string data.
 		/// \param[out] values A flat (empty) matrix. This will be resized automatically.
 		/// \return Matrix information
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		///
 		/// Example:
 		/// \include example_runtime_numeric.cpp
@@ -135,7 +135,7 @@ class Parser {
 		/// \param rows_hint `std::nullopt`, or the number of rows which will help with optimizing allocations.
 		/// \param columns The number of columns. If `std::nullopt`, the number of columns is determined automatically.
 		/// \return Matrix information
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		template<typename Vector>
 		constexpr MatrixInformation parseToVectorRowMajor(std::string_view data, Vector& values,
 				std::optional<std::size_t> rows_hint, std::optional<std::size_t> columns) const;
@@ -148,7 +148,7 @@ class Parser {
 		/// \param rows The number of rows, required. It is needed to calculate offsets in output container.
 		/// \param columns_hint `std::nullopt`, or the number of columns which will help with optimizing allocations.
 		/// \return Matrix information
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		template<typename Vector>
 		constexpr MatrixInformation parseToVectorColumnMajor(std::string_view data, Vector& values,
 				std::size_t rows, std::optional<std::size_t> columns_hint) const;
@@ -162,7 +162,7 @@ class Parser {
 		/// \param data Full CSV string data.
 		/// \param order Matrix element order (RowMajor or ColumnMajor).
 		/// \return `std::array<Cell, rows*columns>`
-		/// \throws ParseError
+		/// \throws ParseError An exception is thrown on parse error.
 		template<std::size_t rows, std::size_t columns, typename Cell = CellStringReference>
 		constexpr auto parseToArray(std::string_view data, MatrixOrder order) const;
 
